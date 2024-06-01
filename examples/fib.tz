@@ -1,0 +1,38 @@
+let fib_recursive = (n: int): int => {
+  if (n == 0) {
+    return 0
+  }
+
+  if (n == 1 || n == 2) {
+    return 1
+  }
+  
+  return fib_recursive(n - 1) + fib_recursive(n - 2)
+}
+
+let fib_iterative = (n: int): int => {
+    if (n == 0) {
+    return 0
+  }
+
+  if (n == 1) {
+    return 1
+  }
+  
+  let a, b, c: int = 0, 1, 1
+  for (let i: int = 1; i < n; ++i) {
+    c = a + b
+    a = b
+    b = c
+  }
+
+  return b
+}
+
+let main = (args: array<string>): int => {
+  let n: int = 10
+
+  console.log(fib_recursive(n), fib_iterative(n))
+
+  return 0
+}

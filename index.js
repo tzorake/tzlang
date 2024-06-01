@@ -1,7 +1,8 @@
 import fs from "fs"
-import { TokenType } from './src/token.js';
-import { Lexer } from "./src/lexer.js"
-import { Parser } from "./src/parser.js"
+
+import { TokenType } from "./src/parser/token.js"
+import { Lexer } from "./src/parser/lexer.js"
+import { Parser } from "./src/parser/parser.js"
 
 function tzlangCompile(argv)
 {
@@ -18,20 +19,19 @@ function tzlangCompile(argv)
   }
 
   const lexer = new Lexer(data);
-  
-  // lexer test
+
   let token;
-  while((token = lexer.nextToken()).type != TokenType.Eof) {
+  while(!lexer.exhasted()) {
+    token = lexer.nextToken()
     console.log(token);
   }
   lexer.reset();
-  
-  // parser test
+
   const parser = new Parser(lexer);
   const root = parser.parse();
-
+  
   console.log("");
-  console.log(JSON.stringify(root, null, 2));
+  console.log(root);
 }
 
 (() => {

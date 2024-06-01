@@ -3,9 +3,6 @@ import { escape } from "./utils.js"
 let iota = 0;
 export const TokenType = {
   Identifier          : iota++,
-
-  NullLiteral         : iota++,
-  BooleanLiteral      : iota++,
   NumericLiteral      : iota++,
   StringLiteral       : iota++,
 
@@ -45,7 +42,8 @@ export const TokenType = {
   Eof                 : iota++,
 };
 
-export function TokenTypeAsString(type) {
+export function TokenTypeAsString(type) 
+{
   return Object.keys(TokenType).find(key => TokenType[key] === type);
 }
 
@@ -64,26 +62,50 @@ export const RealLiteralKind = {
 
 iota = 0;
 export const NumericLiteralType = {
-  Integer : iota++,
-  Real    : iota++,
+  Integer    : iota++,
+  Real       : iota++,
 };
 
-export class Specialization {
-  constructor(type, kind) {
+export class Specialization 
+{
+  constructor(type, kind) 
+  {
     this.type = type;
     this.kind = kind;
   }
+
+  toString() 
+  {
+    return `<Specialization type='${this.type}' kind='${this.kind}'>`;
+  }
 }
 
-export class Token {
-  constructor(value, type, specialization = null) {
+export class Token 
+{
+  constructor(value, type) 
+  {
     this.value = value;
     this.type = type;
+  }
+
+  toString() 
+  {
+    const value = this.type === TokenType.NewLine ? escape(this.value) : this.value;
+    return `<Token value='${value}' type='${TokenTypeAsString(this.type)}'>`;
+  }
+}
+
+export class TokenWithSpecialization extends Token 
+{
+  constructor(value, type, specialization) 
+  {
+    super(value, type);
     this.specialization = specialization;
   }
 
-  toString() {
+  toString() 
+  {
     const value = this.type === TokenType.NewLine ? escape(this.value) : this.value;
-    return `<Token value='${value}' type='${TokenTypeAsString(this.type)}'>`;
+    return `<Token value='${value}' type='${TokenTypeAsString(this.type)}' specialization='${this.specialization}'>`;
   }
 }

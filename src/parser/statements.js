@@ -7,11 +7,14 @@ export const NodeKind = {
   BinaryExpression    : iota++,
 
   Identifier          : iota++,
-  NullLiteral         : iota++,
-  BooleanLiteral      : iota++,
   NumericLiteral      : iota++,
   StringLiteral       : iota++,
 };
+
+export function NodeTypeAsString(type) 
+{
+  return Object.keys(NodeKind).find(key => NodeKind[key] === type);
+}
 
 export const Keyword = {
   Let    : "let",
@@ -77,7 +80,7 @@ export class Identifier extends Expression
   constructor(value) 
   {
     super(NodeKind.Identifier);
-    this.symbol = symbol;
+    this.value = value;
   }
 }
 

@@ -1,5 +1,5 @@
 import { isdigit, isalpha, isalnum, isbinary, ishex, isstrterm } from "./utils.js"
-import { Token, TokenType, Specialization, NumericLiteralType, IntegerLiteralKind } from './token.js';
+import { Token, TokenWithSpecialization, TokenType, Specialization, NumericLiteralType, IntegerLiteralKind, RealLiteralKind } from './token.js';
 
 export class Lexer
 {
@@ -18,9 +18,16 @@ export class Lexer
     this.char = this.source[this.index];
   }
 
+  exhasted()
+  {
+    return this.index >= this.size;
+  }
+
   token(value, type, specialization = null)
   {
-    return new Token(value, type, specialization);
+    return specialization 
+      ? new TokenWithSpecialization(value, type, specialization) 
+      : new Token(value, type);
   }
 
   advance()
@@ -67,14 +74,6 @@ export class Lexer
       value += this.char;
       this.advance();
     } while (isalnum(this.char));
-
-    if (value === "true" || value === "false") {
-      return this.token(value, TokenType.BooleanLiteral);
-    }
-
-    if (value === "null") {
-      return this.token(value, TokenType.NullLiteral);
-    }
 
     return this.token(value, TokenType.Identifier);
   }
