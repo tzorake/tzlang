@@ -1,25 +1,27 @@
 import { TokenType, TokenTypeAsString } from './token.js';
-import { Program, Identifier, NullLiteral, BooleanLiteral, NumericLiteral, StringLiteral, BinaryExpression, BinaryOperator } from './statements.js';
+import { Program, Identifier, NumericLiteral, StringLiteral, BinaryExpression, BinaryOperator } from './statements.js';
 
 export class Parser 
 {
-  constructor(lexer) 
+  constructor(lexer, env) 
   {
     this.lexer = lexer;
     this.token = this.lexer.nextToken();
+    this.env = env;
   }
 
   reset()
   {
     this.lexer.reset();
     this.token = this.lexer.nextToken();
+    this.env.reset();
   }
 
   parse() 
   {
     const statements = [];
 
-    while (this.token.type !== TokenType.Eof) {
+    while (!this.lexer.exhasted()) {
       const statement = this.parseStatement();
 
       statements.push(statement);
@@ -71,14 +73,6 @@ export class Parser
         return this.parseIdentifier();
       } break;
 
-      case TokenType.NullLiteral: {
-        return this.parseNullLiteral();
-      } break;
-
-      case TokenType.BooleanLiteral: {
-        return this.parseBooleanLiteral();
-      } break;
-
       case TokenType.NumericLiteral: {
         return this.parseNumericLiteral();
       } break;
@@ -107,21 +101,6 @@ export class Parser
     this.eat(TokenType.Identifier);
 
     return new Identifier(value);
-  }
-
-  parseBooleanLiteral()
-  {
-    const value = Boolean(this.token.value);
-    this.eat(TokenType.BooleanLiteral);
-
-    return new BooleanLiteral(value);
-  }
-  
-  parseNullLiteral()
-  {
-    this.eat(TokenType.NullLiteral);
-
-    return new NullLiteral();
   }
 
   parseNumericLiteral()

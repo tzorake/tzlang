@@ -5,8 +5,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon index.js"
+    "tz": "cls && node index.js examples/variables.tz",
+    "test": "cls && node tests/index.js"
   },
   "author": "tzorake",
   "license": "ISC",
