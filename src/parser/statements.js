@@ -4,6 +4,8 @@ let iota = 0;
 export const NodeKind = {
   Program             : iota++,
   Statement           : iota++,
+
+  VariableDeclaration : iota++,
   BinaryExpression    : iota++,
 
   Identifier          : iota++,
@@ -22,21 +24,27 @@ export const Keyword = {
   If     : "if",
   Else   : "else",
   For    : "for",
-}
+};
 
 const BinaryOperator__precedence_1 = {
-  [TokenType.Plus]    : "+",
-  [TokenType.Minus]   : "-",
+  [TokenType.Asterisk]    : "*",
+  [TokenType.Slash]       : "/",
 };
 
 const BinaryOperator__precedence_2 = {
-  [TokenType.Asterisk] : "*",
-  [TokenType.Slash]    : "/",
+  [TokenType.Plus]        : "+",
+  [TokenType.Minus]       : "-",
+};
+
+iota = 0;
+export const Precedence = {
+  Precedence1         : iota++,
+  Precedence2         : iota++,
 };
 
 export const BinaryOperator = {
-  Precedence1: BinaryOperator__precedence_1,
-  Precedence2: BinaryOperator__precedence_2,
+  [Precedence.Precedence1]: BinaryOperator__precedence_1,
+  [Precedence.Precedence2]: BinaryOperator__precedence_2,
 };
 
 export class Statement 
@@ -112,6 +120,15 @@ export class NumericLiteral extends Expression
 }
 
 export class StringLiteral extends Expression 
+{
+  constructor(value) 
+  {
+    super(NodeKind.StringLiteral);
+    this.value = value;
+  }
+}
+
+export class VariableDeclaration extends Expression 
 {
   constructor(value) 
   {

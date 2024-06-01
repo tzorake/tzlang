@@ -1,5 +1,5 @@
 import { TokenType, TokenTypeAsString } from './token.js';
-import { Program, Identifier, NumericLiteral, StringLiteral, BinaryExpression, BinaryOperator } from './statements.js';
+import { Program, Identifier, NumericLiteral, StringLiteral, BinaryExpression, BinaryOperator, Precedence } from './statements.js';
 
 export class Parser 
 {
@@ -22,9 +22,11 @@ export class Parser
     const statements = [];
 
     while (!this.lexer.exhasted) {
-    const statement = this.parseStatement();
+      const statement = this.parseStatement();
 
-      statements.push(statement);
+      if (statement) {
+        statements.push(statement);
+      }
     }
 
     return new Program(statements);
@@ -32,6 +34,14 @@ export class Parser
 
   parseStatement()
   {
+    while (this.token.type === TokenType.NewLine) {
+      this.eat(TokenType.NewLine);
+    }
+
+    if (this.token.type === TokenType.Eof) {
+      return null;
+    }
+
     return this.parseExpression();
   }
 
@@ -42,24 +52,27 @@ export class Parser
 
   parseBinaryExpression__precedence_2()
   {
-    let left = this.parseBinaryExpression__precedence_1();
-    while (Object.hasOwn(BinaryOperator.Precedence1, this.token.type)) {
-      const operator = this.token;
-      this.eat(operator.type);
-      const right = this.parseBinaryExpression__precedence_1();
-      left = new BinaryExpression(operator, left, right);
-    }
-
-    return left;
+    return this.parseBinaryExpressionWithPrecedence(
+      Precedence.Precedence2, 
+      () => this.parseBinaryExpression__precedence_1()
+    );
   }
 
   parseBinaryExpression__precedence_1()
   {
-    let left = this.parsePrimaryExpression();
-    while (Object.hasOwn(BinaryOperator.Precedence2, this.token.type)) {
+    return this.parseBinaryExpressionWithPrecedence(
+      Precedence.Precedence1, 
+      () => this.parsePrimaryExpression()
+    );
+  }
+
+  parseBinaryExpressionWithPrecedence(precedence, lowerPrecedenceConsumer)
+  {
+    let left = lowerPrecedenceConsumer();
+    while (Object.hasOwn(BinaryOperator[precedence], this.token.type)) {
       const operator = this.token;
       this.eat(operator.type);
-      const right = this.parsePrimaryExpression();
+      const right = lowerPrecedenceConsumer();
       left = new BinaryExpression(operator, left, right);
     }
 
@@ -87,11 +100,6 @@ export class Parser
         this.eat(TokenType.CloseParen);
 
         return value;
-      } break;
-
-      case TokenType.NewLine: {
-        this.eat(TokenType.NewLine);
-        return this.parse();
       } break;
 
       default: {

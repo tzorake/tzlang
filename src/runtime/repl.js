@@ -20,12 +20,18 @@ function tzlangRepl() {
       return 0;
     }
 
-    const lexer = new Lexer(data);
-    const parser = new Parser(lexer);
-    const root = parser.parse();
-    const result = interpreter.evaluate(root);
-
-    console.log(result);
+    try {
+      const lexer = new Lexer(data);
+      const parser = new Parser(lexer);
+      const root = parser.parse();
+      const result = interpreter.evaluate(root);
+      
+      console.log(result);
+    }
+    catch (err) {
+      console.log(`${err.name}: ${err.message}`);
+      continue;
+    }
   }
 
   return 1; // unreachable

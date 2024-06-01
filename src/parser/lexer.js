@@ -10,7 +10,6 @@ export class Lexer
 
     this.index = 0;
     this.char = this.source[this.index];
-
     this.exhasted = false;
   }
 
@@ -18,6 +17,7 @@ export class Lexer
   {
     this.index = 0;
     this.char = this.source[this.index];
+    this.exhasted = false;
   }
 
   token(value, type, specialization = null)

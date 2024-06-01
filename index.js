@@ -1,6 +1,5 @@
 import fs from "fs"
 
-import { TokenType } from "./src/parser/token.js"
 import { Lexer } from "./src/parser/lexer.js"
 import { Parser } from "./src/parser/parser.js"
 
@@ -21,7 +20,7 @@ function tzlangCompile(argv)
   const lexer = new Lexer(data);
 
   let token;
-  while(!lexer.exhasted()) {
+  while(!lexer.exhasted) {
     token = lexer.nextToken()
     console.log(token);
   }

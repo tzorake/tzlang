@@ -72,6 +72,10 @@ export class Interpreter
       case TokenType.Plus: {
         return this.evaluateNumericBinaryExpression__plus(lhs, rhs);
       } break;
+
+      case TokenType.Asterisk: {
+        return this.evaluateNumericBinaryExpression__asterisk(lhs, rhs);
+      } break;
     }
 
     throw new Error(`Unsupported binary expression: ${TokenTypeAsString[operator.type]}`);
@@ -83,6 +87,14 @@ export class Interpreter
     const rhs = right.value;
 
     return new NumberValue(lhs + rhs);
+  }
+
+  evaluateNumericBinaryExpression__asterisk(left, right)
+  {
+    const lhs = left.value;
+    const rhs = right.value;
+
+    return new NumberValue(lhs * rhs);
   }
 
   evaluateNumericLiteral(node) {
