@@ -21,8 +21,8 @@ export class Parser
   {
     const statements = [];
 
-    while (!this.lexer.exhasted()) {
-      const statement = this.parseStatement();
+    while (!this.lexer.exhasted) {
+    const statement = this.parseStatement();
 
       statements.push(statement);
     }
@@ -87,6 +87,11 @@ export class Parser
         this.eat(TokenType.CloseParen);
 
         return value;
+      } break;
+
+      case TokenType.NewLine: {
+        this.eat(TokenType.NewLine);
+        return this.parse();
       } break;
 
       default: {

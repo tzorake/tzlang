@@ -2,6 +2,7 @@ let iota = 0;
 export const RuntimeValueType = {
   Null      : iota++,
   Number    : iota++,
+  Boolean   : iota++,
 };
 
 export class RuntimeValue
@@ -17,6 +18,15 @@ export class NullValue extends RuntimeValue
   constructor(value)
   {
     super(RuntimeValueType.Null);
+    this.value = value;
+  }
+}
+
+export class BooleanValue extends RuntimeValue
+{
+  constructor(value)
+  {
+    super(RuntimeValueType.Boolean);
     this.value = value;
   }
 }

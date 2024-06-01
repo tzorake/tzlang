@@ -2,7 +2,7 @@ import { Lexer } from "../src/parser/lexer.js"
 import { Parser } from "../src/parser/parser.js"
 import { Interpreter } from "../src/runtime/interpreter.js"
 import { Environment } from "../src/runtime/environment.js"
-import { TZ_NULL, TZ_NUMBER } from "../src/runtime/macros.js"
+import { TZ_NULL, TZ_NUMBER, TZ_BOOLEAN } from "../src/runtime/macros.js"
 
 const tests = {};
 
@@ -15,9 +15,9 @@ createTest("test__lexer_execution", () => {
   const lexer = new Lexer(data);
   
   let token;
-  while(!lexer.exhasted()) {
+  while(!lexer.exhasted) {
     console.log(token);
-    token = lexer.nextToken()
+    token = lexer.nextToken();
   }
   console.log("");
 });
@@ -33,7 +33,7 @@ createTest("test__parser_execution", () => {
 });
 
 createTest("test__interpreter_execution", () => {
-  const data = "x + y";
+  const data = "true";
   const lexer = new Lexer(data);
   const parser = new Parser(lexer);
   const root = parser.parse();
@@ -42,6 +42,8 @@ createTest("test__interpreter_execution", () => {
   env.define("null", TZ_NULL());
   env.define("x", TZ_NUMBER(3));
   env.define("y", TZ_NUMBER(8));
+  env.define("true", TZ_BOOLEAN(true));
+  env.define("false", TZ_BOOLEAN(false));
 
   const interpreter = new Interpreter(env);
   const result = interpreter.evaluate(root);

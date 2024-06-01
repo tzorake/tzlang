@@ -16,23 +16,23 @@ export class Interpreter
       case NodeKind.Program: {
         return this.evaluateProgram(node);
       } break;
-
+      
       case NodeKind.BinaryExpression: {
         return this.evaluateBinaryExpression(node);
-      } break;
-
-      case NodeKind.NumericLiteral: {
-        return this.evaluateNumericLiteral(node);
       } break;
 
       case NodeKind.Identifier: {
         return this.evaluateIdentifier(node);
       } break;
 
+      case NodeKind.NumericLiteral: {
+        return this.evaluateNumericLiteral(node);
+      } break;
+
       case NodeKind.StringLiteral: {
         return this.evaluateStringLiteral(node);
       } break;
-      
+
       default:
         throw new Error(`Unsupported node kind: ${NodeTypeAsString[node.kind]}`);
     }

@@ -10,17 +10,14 @@ export class Lexer
 
     this.index = 0;
     this.char = this.source[this.index];
+
+    this.exhasted = false;
   }
 
   reset()
   {
     this.index = 0;
     this.char = this.source[this.index];
-  }
-
-  exhasted()
-  {
-    return this.index >= this.size;
   }
 
   token(value, type, specialization = null)
@@ -361,7 +358,6 @@ export class Lexer
         } break;
 
         case undefined: {
-          return this.advanceCurrent(TokenType.Eof);
         } break;
 
         default: {
@@ -370,6 +366,7 @@ export class Lexer
       }
     }
 
+    this.exhasted = true;
     return this.token(undefined, TokenType.Eof);
   }
 
