@@ -116,7 +116,7 @@ export class Parser
       } break;
 
       default: {
-        throw new Error(`Unexpected token: ${TokenTypeAsString(this.token.type)}`);
+        throw new Error(`unexpected token: ${TokenTypeAsString(this.token.type)}`);
       }
     }
   }
@@ -161,7 +161,7 @@ export class Parser
     if (this.token.type === TokenType.NewLine || this.token.type === TokenType.Eof) {
       this.eat(this.token.type);
     } else {
-      throw new Error(`Expected ${TokenTypeAsString(TokenType.NewLine)} or ${TokenTypeAsString(TokenType.Eof)} but got ${TokenTypeAsString(this.token.type)}`);
+      throw new Error(`expected ${TokenTypeAsString(TokenType.NewLine)} or ${TokenTypeAsString(TokenType.Eof)} but got ${TokenTypeAsString(this.token.type)}`);
     }
 
     return new VariableDeclaration(name, value);
@@ -171,7 +171,7 @@ export class Parser
   {
     const tokenType = this.token.type;
     if (type != tokenType) {
-      throw new Error(`Expected ${TokenTypeAsString(type)} but got ${TokenTypeAsString(tokenType)}`);
+      throw new Error(`expected ${TokenTypeAsString(type)} but got ${TokenTypeAsString(tokenType)}`);
     }
 
     this.token = this.lexer.nextToken();

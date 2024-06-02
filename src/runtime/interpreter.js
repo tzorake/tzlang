@@ -38,7 +38,7 @@ export class Interpreter
       } break;
 
       default:
-        throw new Error(`Unsupported node kind: ${NodeTypeAsString[node.kind]}`);
+        throw new Error(`unsupported node kind: ${NodeTypeAsString[node.kind]}`);
     }
   }
 
@@ -74,7 +74,7 @@ export class Interpreter
       return this.evaluateNumericBinaryExpression(node.operator, lhs, rhs);
     }
 
-    throw new Error(`Unsupported binary expression: ${NodeTypeAsString[node.kind]}`);
+    throw new Error(`unsupported binary expression: ${NodeTypeAsString[node.kind]}`);
   }
 
   evaluateIdentifier(node)
@@ -94,7 +94,7 @@ export class Interpreter
       } break;
     }
 
-    throw new Error(`Unsupported binary expression: ${TokenTypeAsString[operator.type]}`);
+    throw new Error(`unsupported binary expression: ${TokenTypeAsString[operator.type]}`);
   }
 
   evaluateNumericBinaryExpression__plus(left, right) 

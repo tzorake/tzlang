@@ -86,7 +86,7 @@ export class Lexer
         return this.lexBinary();
       }
 
-      throw new Error("Invalid number");
+      throw new Error("invalid number");
     }
 
     let value = "";
@@ -147,7 +147,7 @@ export class Lexer
     this.advance();
 
     if (!ishex(this.char)) {
-      throw new Error("Unexpected digit after 0x");
+      throw new Error("unexpected digit after 0x");
     }
 
     do {
@@ -172,7 +172,7 @@ export class Lexer
     this.advance();
 
     if (!isbinary(this.char)) {
-      throw new Error("Unexpected digit after 0b");
+      throw new Error("unexpected digit after 0b");
     }
 
     do {
@@ -203,7 +203,7 @@ export class Lexer
     }
 
     if (this.char === undefined) {
-      throw new Error("Unterminated string");
+      throw new Error("unterminated string");
     }
 
     this.advance();
@@ -361,7 +361,7 @@ export class Lexer
         } break;
 
         default: {
-          throw new Error(`Unexpected character: '${this.char}'`);
+          throw new Error(`unexpected character: '${this.char}'`);
         }
       }
     }

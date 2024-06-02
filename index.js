@@ -14,7 +14,7 @@ function tzlangCompile(argv)
       throw err;
     }
   } else {
-    throw new Error(`File does not exist: ${path}`);
+    throw new Error(`file does not exist: ${path}`);
   }
 
   const lexer = new Lexer(data);

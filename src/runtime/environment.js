@@ -21,13 +21,13 @@ export class Environment
       return this.parent.resolve(name);
     }
 
-    throw new Error(`Variable '${name}' is not defined!`);
+    throw new Error(`variable '${name}' is not defined!`);
   }
 
   define(name, value)
   {
     if (this.has(name)) {
-      throw new Error(`Variable '${name}' is already defined!`);
+      throw new Error(`variable '${name}' is already defined!`);
     }
 
     this.variables[name] = value;
@@ -41,7 +41,7 @@ export class Environment
       this.variables[name] = value;
     }
 
-    throw new Error(`Variable '${name}' is not defined!`);
+    throw new Error(`variable '${name}' is not defined!`);
   }
 
   has(name) {
