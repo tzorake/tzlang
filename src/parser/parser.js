@@ -1,22 +1,39 @@
-import { TokenType, TokenTypeAsString } from './token.js';
-import { Program, Identifier, NumericLiteral, StringLiteral, BinaryExpression, BinaryOperator, Precedence, Keyword, VariableDeclaration, NodeKind } from './statements.js';
+import { Lexer } from './lexer.js';
+import { TokenType, Token, TokenTypeAsString } from './token.js';
+import { Program, Identifier, NumericLiteral, StringLiteral, BinaryExpression, BinaryOperator, Precedence, Keyword, VariableDeclaration, NodeKind, Expression } from './statements.js';
 
 export class Parser 
 {
-  constructor(lexer, env) 
+  /**
+   * @constructor
+   * @param {Lexer} lexer
+   */
+  constructor(lexer) 
   {
+    /**
+     * @type {Lexer}
+     */
     this.lexer = lexer;
+    /**
+     * @type {Token}
+     */
     this.token = this.lexer.nextToken();
-    this.env = env;
   }
 
+  /**
+   * @throws {Error}
+   * @returns {Program}
+   */
   reset()
   {
     this.lexer.reset();
     this.token = this.lexer.nextToken();
-    this.env.reset();
   }
 
+  /**
+   * @throws {Error}
+   * @returns {Program}
+   */
   parse() 
   {
     const statements = [];
@@ -32,6 +49,10 @@ export class Parser
     return new Program(statements);
   }
 
+  /**
+   * @throws {Error}
+   * @returns {Expression | null}
+   */
   parseStatement()
   {
     while (this.token.type === TokenType.NewLine) {
@@ -53,27 +74,30 @@ export class Parser
     return this.parseExpression();
   }
 
+  /**
+   * @throws {Error}
+   * @returns {Expression}
+   */
   parseExpression()
   {
     return this.parseBinaryExpression();
   }
 
+  /**
+   * @throws {Error}
+   * @returns {Expression}
+   */
   parseBinaryExpression()
   {
     return this.parseBinaryExpression__precedence_3();
   }
 
+  /**
+   * @throws {Error}
+   * @returns {Expression}
+   */
   parseBinaryExpression__precedence_3()
   {
-  //   let left = this.parseBinaryExpression__precedence_2();
-  //   while (Object.hasOwn(BinaryOperator[Precedence.Precedence3], this.token.type)) {
-  //     const operator = this.token;
-  //     this.eat(operator.type);
-  //     const right = this.parseBinaryExpression__precedence_3();
-  //     left = new AssignmentExpression(operator, left, right);
-  //   }
-
-  //   return left;
     return this.parseBinaryExpressionWithPrecedence(
       Precedence.Precedence3, 
       () => this.parseBinaryExpression__precedence_2(),
@@ -82,6 +106,10 @@ export class Parser
     );
   }
 
+  /**
+   * @throws {Error}
+   * @returns {Expression}
+   */
   parseBinaryExpression__precedence_2()
   {
     return this.parseBinaryExpressionWithPrecedence(
@@ -92,6 +120,10 @@ export class Parser
     );
   }
 
+  /**
+   * @throws {Error}
+   * @returns {Expression}
+   */
   parseBinaryExpression__precedence_1()
   {
     return this.parseBinaryExpressionWithPrecedence(
@@ -102,6 +134,10 @@ export class Parser
     );
   }
 
+  /**
+   * @throws {Error}
+   * @returns {Expression}
+   */
   parseBinaryExpressionWithPrecedence(precedence, leftPrecedenceConsumer, rightPrecedenceConsumer, kind)
   {
     let left = leftPrecedenceConsumer();
@@ -115,6 +151,10 @@ export class Parser
     return left;
   }
 
+  /**
+   * @throws {Error}
+   * @returns {Expression}
+   */
   parsePrimaryExpression()
   {
     switch (this.token.type) {
@@ -144,6 +184,10 @@ export class Parser
     }
   }
 
+  /**
+   * @throws {Error}
+   * @returns {Identifier}
+   */
   parseIdentifier()
   {
     const value = this.token.value;
@@ -152,6 +196,10 @@ export class Parser
     return new Identifier(value);
   }
 
+  /**
+   * @throws {Error}
+   * @returns {NumericLiteral}
+   */
   parseNumericLiteral()
   {
     const value = Number(this.token.value);
@@ -160,6 +208,10 @@ export class Parser
     return new NumericLiteral(value);
   }
 
+  /**
+   * @throws {Error}
+   * @returns {StringLiteral}
+   */
   parseStringLiteral()
   {
     const value = this.token.value;
@@ -168,6 +220,10 @@ export class Parser
     return new StringLiteral(value);
   }
 
+  /**
+   * @throws {Error}
+   * @returns {VariableDeclaration}
+   */
   parseVariableDeclaration()
   {
     // [] - optional
@@ -192,6 +248,10 @@ export class Parser
     return new VariableDeclaration(name, value);
   }
 
+  /**
+   * @throws {Error}
+   * @returns {void}
+   */
   eat(type)
   {
     const tokenType = this.token.type;
@@ -202,6 +262,11 @@ export class Parser
     this.token = this.lexer.nextToken();
   }
 
+  /**
+   * @param {number} [offset=0]
+   * 
+   * @returns {string | undefined}
+   */
   peek(offset = 0)
   {
     return this.lexer.peek(offset);

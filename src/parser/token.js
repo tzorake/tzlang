@@ -1,6 +1,13 @@
 import { escape } from "./utils.js"
 
+/**
+ * @param {number}
+ */
 let iota = 0;
+/**
+ * @readonly
+ * @enum {number}
+ */
 export const TokenType = {
   Identifier          : iota++,
   NumericLiteral      : iota++,
@@ -42,12 +49,31 @@ export const TokenType = {
   Eof                 : iota++,
 };
 
-export function TokenTypeAsString(type) 
+/**
+ * @param {TokenType} type 
+ * 
+ * @returns {string | undefined}
+ */
+export function TokenTypeAsString(type)
 {
   return Object.keys(TokenType).find(key => TokenType[key] === type);
 }
 
 iota = 0;
+/**
+ * @readonly
+ * @enum {number}
+ */
+export const NumericLiteralType = {
+  Integer    : iota++,
+  Real       : iota++,
+};
+
+iota = 0;
+/**
+ * @readonly
+ * @enum {number}
+ */
 export const IntegerLiteralKind = {
   Regular    : iota++,
   Binary     : iota++,
@@ -55,26 +81,38 @@ export const IntegerLiteralKind = {
 };
 
 iota = 0;
+/**
+ * @readonly
+ * @enum {number}
+ */
 export const RealLiteralKind = {
   Regular    : iota++,
   Scientific : iota++,
 };
 
-iota = 0;
-export const NumericLiteralType = {
-  Integer    : iota++,
-  Real       : iota++,
-};
-
 export class Specialization 
 {
-  constructor(type, kind) 
+  /**
+   * @constructor
+   * @param {NumericLiteralType} type
+   * @param {IntegerLiteralKind | RealLiteralKind} kind
+   */
+  constructor(type, kind)
   {
+    /**
+     * @type {NumericLiteralType}
+     */
     this.type = type;
+    /**
+     * @type {IntegerLiteralKind | RealLiteralKind}
+     */
     this.kind = kind;
   }
 
-  toString() 
+  /**
+   * @returns {string}
+   */
+  toString()
   {
     return `<Specialization type='${this.type}' kind='${this.kind}'>`;
   }
@@ -82,13 +120,27 @@ export class Specialization
 
 export class Token 
 {
-  constructor(value, type) 
+  /**
+   * @constructor
+   * @param {string} value
+   * @param {TokenType} type
+   */
+  constructor(value, type)
   {
+    /**
+     * @type {string}
+     */
     this.value = value;
+    /**
+     * @type {TokenType}
+     */
     this.type = type;
   }
 
-  toString() 
+  /**
+   * @returns {string}
+   */
+  toString()
   {
     const value = this.type === TokenType.NewLine ? escape(this.value) : this.value;
     return `<Token value='${value}' type='${TokenTypeAsString(this.type)}'>`;
@@ -97,12 +149,24 @@ export class Token
 
 export class TokenWithSpecialization extends Token 
 {
+  /**
+   * @constructor
+   * @param {string} value
+   * @param {TokenType} type
+   * @param {Specialization} specialization
+   */
   constructor(value, type, specialization) 
   {
     super(value, type);
+    /**
+     * @type {Specialization}
+     */
     this.specialization = specialization;
   }
 
+  /**
+   * @returns {string}
+   */
   toString() 
   {
     const value = this.type === TokenType.NewLine ? escape(this.value) : this.value;

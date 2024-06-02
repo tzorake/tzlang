@@ -3,16 +3,38 @@ import { Token, TokenWithSpecialization, TokenType, Specialization, NumericLiter
 
 export class Lexer
 {
+  /**
+   * @constructor
+   * @param {string} source
+   */
   constructor(source)
   {
+    /**
+     * @type {string}
+     */
     this.source = source;
+    /**
+     * @type {number}
+     */
     this.size = source.length;
 
+    /**
+     * @type {number}
+     */
     this.index = 0;
+    /**
+     * @type {string}
+     */
     this.char = this.source[this.index];
+    /**
+     * @type {boolean}
+     */
     this.exhasted = false;
   }
 
+  /**
+   * @returns {void}
+   */
   reset()
   {
     this.index = 0;
@@ -20,6 +42,13 @@ export class Lexer
     this.exhasted = false;
   }
 
+  /**
+   * @param {string} value
+   * @param {TokenType} type
+   * @param {Specialization} specialization
+   * 
+   * @returns {Token}
+   */
   token(value, type, specialization = null)
   {
     return specialization 
@@ -27,6 +56,9 @@ export class Lexer
       : new Token(value, type);
   }
 
+  /**
+   * @returns {void}
+   */
   advance()
   {
     if (this.index < this.size && this.char != undefined) {
@@ -35,6 +67,11 @@ export class Lexer
     }
   }
 
+  /**
+   * @param {Token} token
+   * 
+   * @returns {Token}
+   */
   advanceWith(token)
   {
     this.advance();
@@ -42,11 +79,22 @@ export class Lexer
     return token;
   }
 
+  /**
+   * @param {number} offset
+   * 
+   * @returns {string}
+   */
   peek(offset = 0)
   {
     return this.source[this.index + offset];
   }
 
+  /**
+   * @param {number} [offset=0]
+   * @param {string} char
+   * 
+   * @returns {boolean}
+   */
   checkedPeek(offset = 0, char)
   {
     if (this.index + offset >= this.size) {
@@ -56,6 +104,11 @@ export class Lexer
     return this.peek(offset) === char;
   }
 
+  /**
+   * @param {TokenType} type
+   * 
+   * @returns {Token}
+   */
   advanceCurrent(type)
   {
     const value = this.char;
@@ -64,6 +117,9 @@ export class Lexer
     return this.token(value, type);
   }
 
+  /**
+   * @returns {Token}
+   */
   lexIdentifier()
   {
     let value = "";
@@ -75,6 +131,10 @@ export class Lexer
     return this.token(value, TokenType.Identifier);
   }
 
+  /**
+   * @throws {Error}
+   * @returns {Token}
+   */
   lexNumber()
   {
     if (this.checkedPeek(0, "0")) {
@@ -140,6 +200,10 @@ export class Lexer
     );
   }
 
+  /**
+   * @throws {Error}
+   * @returns {Token}
+   */
   lexHex()
   {
     let value = "0x";
@@ -165,6 +229,10 @@ export class Lexer
     );
   }
 
+  /**
+   * @throws {Error}
+   * @returns {Token}
+   */
   lexBinary()
   {
     let value = "0b";
@@ -190,6 +258,10 @@ export class Lexer
     );
   }
 
+  /**
+   * @throws {Error}
+   * @returns {Token}
+   */
   lexString()
   {
     const startWith = this.char;
@@ -211,6 +283,10 @@ export class Lexer
     return this.token(value, TokenType.StringLiteral);
   }
 
+  /**
+   * @throws {Error}
+   * @returns {Token}
+   */
   nextToken()
   {
     while (this.char != undefined) {
@@ -370,6 +446,9 @@ export class Lexer
     return this.token(undefined, TokenType.Eof);
   }
 
+  /**
+   * @returns {void}
+   */
   skipWhitespaces()
   {
     while (this.char == " " || this.char == "\t" || this.char == "\r") {

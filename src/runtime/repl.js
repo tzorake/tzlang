@@ -9,9 +9,9 @@ const prompt = promptSync();
 
 function tzlangRepl() {
   const env = new Environment();
-  env.define("null", TZ_NULL());
-  env.define("true", TZ_BOOLEAN(true));
-  env.define("false", TZ_BOOLEAN(false));
+  env.defineConstant("null",  TZ_NULL());
+  env.defineConstant("false", TZ_BOOLEAN(false));
+  env.defineConstant("true",  TZ_BOOLEAN(true));
   const interpreter = new Interpreter(env);
 
   while (true) {
@@ -20,18 +20,18 @@ function tzlangRepl() {
       return 0;
     }
 
-    // try {
+    try {
       const lexer = new Lexer(data);
       const parser = new Parser(lexer);
       const root = parser.parse();
       const result = interpreter.evaluate(root);
       
       console.log(result);
-    // }
-    // catch (err) {
-    //   console.log(`${err.name}: ${err.message}`);
-    //   continue;
-    // }  
+    }
+    catch (err) {
+      console.log(err);
+      continue;
+    }  
   }
 
   return 1; // unreachable

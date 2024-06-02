@@ -39,9 +39,9 @@ createTest("test__interpreter_execution", () => {
   const root = parser.parse();
 
   const env = new Environment();
-  env.define("null", TZ_NULL());
-  env.define("false", TZ_BOOLEAN(false));
-  env.define("true", TZ_BOOLEAN(true));
+  env.defineConstant("null",  TZ_NULL());
+  env.defineConstant("false", TZ_BOOLEAN(false));
+  env.defineConstant("true",  TZ_BOOLEAN(true));
   env.define("x", TZ_NUMBER(3));
   env.define("y", TZ_NUMBER(8));
 
