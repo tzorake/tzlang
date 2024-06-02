@@ -1,4 +1,4 @@
-import { NodeKind, NodeTypeAsString, VariableDeclaration } from "../parser/statements.js"
+import { NodeKind, NodeKindAsString } from "../parser/statements.js"
 import { TokenType, TokenTypeAsString } from "../parser/token.js"
 import { RuntimeValueType, NullValue, NumberValue } from "./values.js";
 
@@ -25,6 +25,10 @@ export class Interpreter
         return this.evaluateBinaryExpression(node);
       } break;
 
+      case NodeKind.AssignmentExpression: {
+        return this.evaluateAssignmentExpression(node);
+      } break;
+
       case NodeKind.Identifier: {
         return this.evaluateIdentifier(node);
       } break;
@@ -38,7 +42,7 @@ export class Interpreter
       } break;
 
       default:
-        throw new Error(`unsupported node kind: ${NodeTypeAsString[node.kind]}`);
+        throw new Error(`unsupported node kind: ${NodeKindAsString(node.kind)}`);
     }
   }
 
@@ -74,7 +78,19 @@ export class Interpreter
       return this.evaluateNumericBinaryExpression(node.operator, lhs, rhs);
     }
 
-    throw new Error(`unsupported binary expression: ${NodeTypeAsString[node.kind]}`);
+    throw new Error(`unsupported binary expression: ${NodeKindAsString(node.kind)}`);
+  }
+
+  evaluateAssignmentExpression(node)
+  {
+    if (node.left.kind !== NodeKind.Identifier) {
+      throw new Error(`unsupported assignment expression: ${NodeKindAsString(node.kind)}`);
+    }
+
+    const identifier = node.left;
+    const value = this.evaluate(node.right);
+
+    return this.env.assign(identifier.value, value);
   }
 
   evaluateIdentifier(node)
@@ -94,7 +110,7 @@ export class Interpreter
       } break;
     }
 
-    throw new Error(`unsupported binary expression: ${TokenTypeAsString[operator.type]}`);
+    throw new Error(`unsupported binary expression: ${TokenTypeAsString(operator.type)}`);
   }
 
   evaluateNumericBinaryExpression__plus(left, right) 

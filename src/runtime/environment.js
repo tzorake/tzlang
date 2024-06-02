@@ -4,6 +4,7 @@ export class Environment
   {
     this.parent = parent;
     this.variables = {};
+    this.constants = [];
   }
 
   reset()
@@ -24,28 +25,41 @@ export class Environment
     throw new Error(`variable '${name}' is not defined!`);
   }
 
-  define(name, value)
+  define(name, value, constant = false)
   {
     if (this.has(name)) {
       throw new Error(`variable '${name}' is already defined!`);
     }
 
     this.variables[name] = value;
+    if (constant) {
+      this.constants.push(name);
+    }
 
     return value;
   }
 
   assign(name, value)
   {
-    if (this.has(name)) {
-      this.variables[name] = value;
+    if (this.constant(name)) {
+      throw new Error(`variable '${name}' is a constant!`);
     }
 
-    throw new Error(`variable '${name}' is not defined!`);
+    if (!this.has(name)) {
+      throw new Error(`variable '${name}' is not defined!`);
+    }
+
+    this.variables[name] = value;
+      
+    return value;
   }
 
   has(name) {
     return Object.hasOwn(this.variables, name);
+  }
+
+  constant(name) {
+    return this.constants.includes(name);
   }
 
   lookup(name) {

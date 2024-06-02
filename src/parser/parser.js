@@ -1,5 +1,5 @@
 import { TokenType, TokenTypeAsString } from './token.js';
-import { Program, Identifier, NumericLiteral, StringLiteral, BinaryExpression, BinaryOperator, Precedence, Keyword, VariableDeclaration } from './statements.js';
+import { Program, Identifier, NumericLiteral, StringLiteral, BinaryExpression, BinaryOperator, Precedence, Keyword, VariableDeclaration, NodeKind } from './statements.js';
 
 export class Parser 
 {
@@ -60,14 +60,35 @@ export class Parser
 
   parseBinaryExpression()
   {
-    return this.parseBinaryExpression__precedence_2();
+    return this.parseBinaryExpression__precedence_3();
+  }
+
+  parseBinaryExpression__precedence_3()
+  {
+  //   let left = this.parseBinaryExpression__precedence_2();
+  //   while (Object.hasOwn(BinaryOperator[Precedence.Precedence3], this.token.type)) {
+  //     const operator = this.token;
+  //     this.eat(operator.type);
+  //     const right = this.parseBinaryExpression__precedence_3();
+  //     left = new AssignmentExpression(operator, left, right);
+  //   }
+
+  //   return left;
+    return this.parseBinaryExpressionWithPrecedence(
+      Precedence.Precedence3, 
+      () => this.parseBinaryExpression__precedence_2(),
+      () => this.parseBinaryExpression__precedence_3(),
+      NodeKind.AssignmentExpression
+    );
   }
 
   parseBinaryExpression__precedence_2()
   {
     return this.parseBinaryExpressionWithPrecedence(
       Precedence.Precedence2, 
-      () => this.parseBinaryExpression__precedence_1()
+      () => this.parseBinaryExpression__precedence_1(),
+      () => this.parseBinaryExpression__precedence_1(),
+      NodeKind.BinaryExpression
     );
   }
 
@@ -75,18 +96,20 @@ export class Parser
   {
     return this.parseBinaryExpressionWithPrecedence(
       Precedence.Precedence1, 
-      () => this.parsePrimaryExpression()
+      () => this.parsePrimaryExpression(),
+      () => this.parsePrimaryExpression(),
+      NodeKind.BinaryExpression
     );
   }
 
-  parseBinaryExpressionWithPrecedence(precedence, lowerPrecedenceConsumer)
+  parseBinaryExpressionWithPrecedence(precedence, leftPrecedenceConsumer, rightPrecedenceConsumer, kind)
   {
-    let left = lowerPrecedenceConsumer();
+    let left = leftPrecedenceConsumer();
     while (Object.hasOwn(BinaryOperator[precedence], this.token.type)) {
       const operator = this.token;
       this.eat(operator.type);
-      const right = lowerPrecedenceConsumer();
-      left = new BinaryExpression(operator, left, right);
+      const right = rightPrecedenceConsumer();
+      left = new BinaryExpression(operator, left, right, kind);
     }
 
     return left;
@@ -147,15 +170,17 @@ export class Parser
 
   parseVariableDeclaration()
   {
-    this.eat(TokenType.Identifier); // let
+    // [] - optional
+    // let name[ = expression]
+    this.eat(TokenType.Identifier);
 
     const name = this.token.value;
-    this.eat(TokenType.Identifier); // name
+    this.eat(TokenType.Identifier);
 
     let value = null;
     if (this.token.type === TokenType.Equal) {
-      this.eat(TokenType.Equal);      // =
-      value = this.parseExpression(); // expressions
+      this.eat(TokenType.Equal);
+      value = this.parseExpression();
     }
 
     if (this.token.type === TokenType.NewLine || this.token.type === TokenType.Eof) {

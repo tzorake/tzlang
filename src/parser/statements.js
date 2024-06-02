@@ -2,18 +2,19 @@ import { TokenType } from "./token.js";
 
 let iota = 0;
 export const NodeKind = {
-  Program             : iota++,
-  Statement           : iota++,
+  Program              : iota++,
+  Statement            : iota++,
 
-  VariableDeclaration : iota++,
-  BinaryExpression    : iota++,
+  Identifier           : iota++,
+  NumericLiteral       : iota++,
+  StringLiteral        : iota++,
 
-  Identifier          : iota++,
-  NumericLiteral      : iota++,
-  StringLiteral       : iota++,
+  VariableDeclaration  : iota++,
+  BinaryExpression     : iota++,
+  AssignmentExpression : iota++,
 };
 
-export function NodeTypeAsString(type) 
+export function NodeKindAsString(type) 
 {
   return Object.keys(NodeKind).find(key => NodeKind[key] === type);
 }
@@ -36,15 +37,21 @@ const BinaryOperator__precedence_2 = {
   [TokenType.Minus]       : "-",
 };
 
+const BinaryOperator__precedence_3 = {
+  [TokenType.Equal]       : "=",
+};
+
 iota = 0;
 export const Precedence = {
   Precedence1         : iota++,
   Precedence2         : iota++,
+  Precedence3         : iota++,
 };
 
 export const BinaryOperator = {
   [Precedence.Precedence1]: BinaryOperator__precedence_1,
   [Precedence.Precedence2]: BinaryOperator__precedence_2,
+  [Precedence.Precedence3]: BinaryOperator__precedence_3,
 };
 
 export class Statement 
@@ -74,9 +81,9 @@ export class Expression extends Statement
 
 export class BinaryExpression extends Expression 
 {
-  constructor(operator, left, right) 
+  constructor(operator, left, right, kind = NodeKind.BinaryExpression) 
   {
-    super(NodeKind.BinaryExpression);
+    super(kind);
     this.operator = operator;
     this.left = left;
     this.right = right;
