@@ -31,6 +31,8 @@ export class Environment
     }
 
     this.variables[name] = value;
+
+    return value;
   }
 
   assign(name, value)

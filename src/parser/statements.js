@@ -130,9 +130,10 @@ export class StringLiteral extends Expression
 
 export class VariableDeclaration extends Expression 
 {
-  constructor(value) 
+  constructor(identifier, value = null) 
   {
-    super(NodeKind.StringLiteral);
+    super(NodeKind.VariableDeclaration);
+    this.identifier = identifier;
     this.value = value;
   }
 }

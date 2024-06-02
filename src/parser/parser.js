@@ -1,5 +1,5 @@
 import { TokenType, TokenTypeAsString } from './token.js';
-import { Program, Identifier, NumericLiteral, StringLiteral, BinaryExpression, BinaryOperator, Precedence } from './statements.js';
+import { Program, Identifier, NumericLiteral, StringLiteral, BinaryExpression, BinaryOperator, Precedence, Keyword, VariableDeclaration } from './statements.js';
 
 export class Parser 
 {
@@ -42,7 +42,20 @@ export class Parser
       return null;
     }
 
+    switch (this.token.type) {
+      case TokenType.Identifier: {
+        if (this.token.value === Keyword.Let) {
+          return this.parseVariableDeclaration();
+        }
+      } break;
+    }
+
     return this.parseExpression();
+  }
+
+  parseExpression()
+  {
+    return this.parseBinaryExpression();
   }
 
   parseBinaryExpression()
@@ -132,9 +145,26 @@ export class Parser
     return new StringLiteral(value);
   }
 
-  parseExpression()
+  parseVariableDeclaration()
   {
-    return this.parseBinaryExpression();
+    this.eat(TokenType.Identifier); // let
+
+    const name = this.token.value;
+    this.eat(TokenType.Identifier); // name
+
+    let value = null;
+    if (this.token.type === TokenType.Equal) {
+      this.eat(TokenType.Equal);      // =
+      value = this.parseExpression(); // expressions
+    }
+
+    if (this.token.type === TokenType.NewLine || this.token.type === TokenType.Eof) {
+      this.eat(this.token.type);
+    } else {
+      throw new Error(`Expected ${TokenTypeAsString(TokenType.NewLine)} or ${TokenTypeAsString(TokenType.Eof)} but got ${TokenTypeAsString(this.token.type)}`);
+    }
+
+    return new VariableDeclaration(name, value);
   }
 
   eat(type)

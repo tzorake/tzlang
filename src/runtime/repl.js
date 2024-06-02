@@ -31,7 +31,7 @@ function tzlangRepl() {
     catch (err) {
       console.log(`${err.name}: ${err.message}`);
       continue;
-    }
+    }  
   }
 
   return 1; // unreachable

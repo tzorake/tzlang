@@ -15,10 +15,10 @@ export class RuntimeValue
 
 export class NullValue extends RuntimeValue
 {
-  constructor(value)
+  constructor()
   {
     super(RuntimeValueType.Null);
-    this.value = value;
+    this.value = null;
   }
 }
 

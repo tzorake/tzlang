@@ -1,4 +1,4 @@
-import { NodeKind, NodeTypeAsString } from "../parser/statements.js"
+import { NodeKind, NodeTypeAsString, VariableDeclaration } from "../parser/statements.js"
 import { TokenType, TokenTypeAsString } from "../parser/token.js"
 import { RuntimeValueType, NullValue, NumberValue } from "./values.js";
 
@@ -17,6 +17,10 @@ export class Interpreter
         return this.evaluateProgram(node);
       } break;
       
+      case NodeKind.VariableDeclaration: {
+        return this.evaluateVariableDeclaration(node);
+      } break;
+
       case NodeKind.BinaryExpression: {
         return this.evaluateBinaryExpression(node);
       } break;
@@ -47,6 +51,18 @@ export class Interpreter
     }
 
     return last;
+  }
+
+  evaluateVariableDeclaration(node)
+  {
+    const value = this.env.define(
+      node.identifier, 
+      node.value 
+        ? this.evaluate(node.value) 
+        : new NullValue()
+    );
+
+    return value;
   }
 
   evaluateBinaryExpression(node)
