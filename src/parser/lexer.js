@@ -1,5 +1,5 @@
-import { isdigit, isalpha, isalnum, isbinary, ishex, isstrterm } from "./utils.js"
-import { Token, TokenWithSpecialization, TokenType, Specialization, NumericLiteralType, IntegerLiteralKind, RealLiteralKind } from './token.js';
+import { isdigit, isalpha, isalnum, isbinary, ishex, isstrterm, escape } from "./utils.js"
+import { Token, TokenWithSpecialization, TokenKind, Specialization, NumericLiteralType, IntegerLiteralKind, RealLiteralKind } from './token.js';
 
 export class Lexer
 {
@@ -33,6 +33,15 @@ export class Lexer
   }
 
   /**
+   * @returns {string}
+   */
+  toString()
+  {
+    const source = escape(this.source);
+    return `<Lexer source='${source}' index=${this.index} char='${this.char}' exhasted=${this.exhasted}/>`;
+  }
+
+  /**
    * @returns {void}
    */
   reset()
@@ -44,7 +53,7 @@ export class Lexer
 
   /**
    * @param {string} value
-   * @param {TokenType} type
+   * @param {TokenKind} type
    * @param {Specialization} specialization
    * 
    * @returns {Token}
@@ -105,7 +114,7 @@ export class Lexer
   }
 
   /**
-   * @param {TokenType} type
+   * @param {TokenKind} type
    * 
    * @returns {Token}
    */
@@ -128,7 +137,7 @@ export class Lexer
       this.advance();
     } while (isalnum(this.char));
 
-    return this.token(value, TokenType.Identifier);
+    return this.token(value, TokenKind.Identifier);
   }
 
   /**
@@ -191,7 +200,7 @@ export class Lexer
 
     return this.token(
       value, 
-      TokenType.NumericLiteral, 
+      TokenKind.NumericLiteral, 
       new Specialization(
         isFloat ? NumericLiteralType.Real : NumericLiteralType.Integer,
         isFloat ? (isScientific ? RealLiteralKind.Regular : RealLiteralKind.Scientific)
@@ -221,7 +230,7 @@ export class Lexer
 
     return this.token(
       value, 
-      TokenType.NumericLiteral, 
+      TokenKind.NumericLiteral, 
       new Specialization(
         NumericLiteralType.Integer, 
         IntegerLiteralKind.Hex
@@ -250,7 +259,7 @@ export class Lexer
 
     return this.token(
       value, 
-      TokenType.NumericLiteral, 
+      TokenKind.NumericLiteral, 
       new Specialization(
         NumericLiteralType.Integer, 
         IntegerLiteralKind.Binary
@@ -280,7 +289,7 @@ export class Lexer
 
     this.advance();
 
-    return this.token(value, TokenType.StringLiteral);
+    return this.token(value, TokenKind.StringLiteral);
   }
 
   /**
@@ -305,135 +314,87 @@ export class Lexer
       }
 
       switch (this.char) {
+        case undefined: {
+        } break;
+
         case "=": {
-          if (this.peek(1) == ">") {
-            this.advance();
-
-            return this.advanceWith(
-              this.token("=>", TokenType.Arrow)
-            );
-          }
-
-          if (this.peek(1) == "=") {
-            this.advance();
-            
-            return this.advanceWith(
-              this.token("==", TokenType.DoubleEqual)
-            );
-          }
-
-          return this.advanceCurrent(TokenType.Equal);
+          return this.advanceCurrent(TokenKind.Equal);
         } break;
 
         case "&": {
-          if (this.peek(1) == "&") {
-            this.advance();
-
-            return this.advanceWith(
-              this.token("&&", TokenType.DoubleAmpersand)
-            );
-          }
-
-          return this.advanceCurrent(TokenType.Ampersand);
+          return this.advanceCurrent(TokenKind.Ampersand);
         } break;
 
         case "|": {
-          if (this.peek(1) == "|") {
-            this.advance();
-
-            return this.advanceWith(
-              this.token("||", TokenType.DoubleBar)
-            );
-          }
-
-          return this.advanceCurrent(TokenType.Bar);
+          return this.advanceCurrent(TokenKind.Bar);
         } break;
 
         case "-": {
-          if (this.peek(1) == "-") {
-            this.advance();
-
-            return this.advanceWith(
-              this.token("--", TokenType.DoubleMinus)
-            );
-          }
-
-          return this.advanceCurrent(TokenType.Minus);
+          return this.advanceCurrent(TokenKind.Minus);
         } break;
 
         case "+": {
-          if (this.peek(1) == "+") {
-            this.advance();
-
-            return this.advanceWith(
-              this.token("++", TokenType.DoublePlus)
-            );
-          }
-
-          return this.advanceCurrent(TokenType.Plus);
+          return this.advanceCurrent(TokenKind.Plus);
         } break;
 
         case "*": {
-          return this.advanceCurrent(TokenType.Asterisk);
+          return this.advanceCurrent(TokenKind.Asterisk);
         } break;
 
         case "/": {
-          return this.advanceCurrent(TokenType.Slash);
+          return this.advanceCurrent(TokenKind.Slash);
         } break;
 
         case "(": {
-          return this.advanceCurrent(TokenType.OpenParen);
+          return this.advanceCurrent(TokenKind.OpenParen);
         } break;
 
         case ")": {
-          return this.advanceCurrent(TokenType.CloseParen);
+          return this.advanceCurrent(TokenKind.CloseParen);
         } break;
 
         case "{": {
-          return this.advanceCurrent(TokenType.OpenCurly);
+          return this.advanceCurrent(TokenKind.OpenCurly);
         } break;
 
         case "}": {
-          return this.advanceCurrent(TokenType.CloseCurly);
+          return this.advanceCurrent(TokenKind.CloseCurly);
         } break;
 
         case "<": {
-          return this.advanceCurrent(TokenType.LessThan);
+          return this.advanceCurrent(TokenKind.LessThan);
         } break;
 
         case ">": {
-          return this.advanceCurrent(TokenType.GreaterThan);
+          return this.advanceCurrent(TokenKind.GreaterThan);
         } break;
 
         case ";": {
-          return this.advanceCurrent(TokenType.Colon);
+          return this.advanceCurrent(TokenKind.Colon);
         } break;
 
         case "\n": {
-          return this.advanceCurrent(TokenType.NewLine);
+          return this.advanceCurrent(TokenKind.NewLine);
         } break;
 
         case ":": {
-          return this.advanceCurrent(TokenType.Semicolon);
+          return this.advanceCurrent(TokenKind.Semicolon);
         } break;
 
         case ".": {
-          return this.advanceCurrent(TokenType.Dot);
+          return this.advanceCurrent(TokenKind.Dot);
         } break;
 
         case ",": {
-          return this.advanceCurrent(TokenType.Comma);
+          return this.advanceCurrent(TokenKind.Comma);
         } break;
 
         case "'": {
-          return this.advanceCurrent(TokenType.Apostrophe);
+          return this.advanceCurrent(TokenKind.Apostrophe);
         } break;
 
         case "\"": {
-          return this.advanceCurrent(TokenType.QuotationMark);
-        } break;
-
-        case undefined: {
+          return this.advanceCurrent(TokenKind.QuotationMark);
         } break;
 
         default: {
@@ -443,7 +404,7 @@ export class Lexer
     }
 
     this.exhasted = true;
-    return this.token(undefined, TokenType.Eof);
+    return this.token(undefined, TokenKind.Eof);
   }
 
   /**

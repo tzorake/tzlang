@@ -8,7 +8,7 @@ let iota = 0;
  * @readonly
  * @enum {number}
  */
-export const TokenType = {
+export const TokenKind = {
   Identifier          : iota++,
   NumericLiteral      : iota++,
   StringLiteral       : iota++,
@@ -50,13 +50,13 @@ export const TokenType = {
 };
 
 /**
- * @param {TokenType} type 
+ * @param {TokenKind} type 
  * 
  * @returns {string | undefined}
  */
-export function TokenTypeAsString(type)
+export function TokenKindAsString(type)
 {
-  return Object.keys(TokenType).find(key => TokenType[key] === type);
+  return Object.keys(TokenKind).find(key => TokenKind[key] === type);
 }
 
 iota = 0;
@@ -123,7 +123,7 @@ export class Token
   /**
    * @constructor
    * @param {string} value
-   * @param {TokenType} type
+   * @param {TokenKind} type
    */
   constructor(value, type)
   {
@@ -132,7 +132,7 @@ export class Token
      */
     this.value = value;
     /**
-     * @type {TokenType}
+     * @type {TokenKind}
      */
     this.type = type;
   }
@@ -142,8 +142,8 @@ export class Token
    */
   toString()
   {
-    const value = this.type === TokenType.NewLine ? escape(this.value) : this.value;
-    return `<Token value='${value}' type='${TokenTypeAsString(this.type)}'>`;
+    const value = this.type === TokenKind.NewLine ? escape(this.value) : this.value;
+    return `<Token value='${value}' type='${TokenKindAsString(this.type)}'>`;
   }
 }
 
@@ -152,7 +152,7 @@ export class TokenWithSpecialization extends Token
   /**
    * @constructor
    * @param {string} value
-   * @param {TokenType} type
+   * @param {TokenKind} type
    * @param {Specialization} specialization
    */
   constructor(value, type, specialization) 
@@ -169,7 +169,7 @@ export class TokenWithSpecialization extends Token
    */
   toString() 
   {
-    const value = this.type === TokenType.NewLine ? escape(this.value) : this.value;
-    return `<Token value='${value}' type='${TokenTypeAsString(this.type)}' specialization='${this.specialization}'>`;
+    const value = this.type === TokenKind.NewLine ? escape(this.value) : this.value;
+    return `<Token value='${value}' type='${TokenKindAsString(this.type)}' specialization='${this.specialization}'>`;
   }
 }

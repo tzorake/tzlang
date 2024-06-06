@@ -92,3 +92,19 @@ export function escape(string)
   return string.replace(/\n/g, '\\n')
                .replace(/\t/g, '\\t');
 }
+
+/**
+ * @param {any} arg 
+ * 
+ * @returns {boolean}
+ */
+export function isclass(arg) {
+  if (typeof arg !== 'function') {
+      return false;
+  }
+
+  const prototype = Object.getPrototypeOf(arg);
+  const is = prototype && prototype !== Function.prototype;
+
+  return is;
+}
