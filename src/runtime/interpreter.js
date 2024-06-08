@@ -1,6 +1,7 @@
 import { NodeKind, NodeKindAsString, Statement, BlockStatement } from "../parser/statements/statements.js"
-import { TokenKind, TokenKindAsString } from "../parser/token.js"
-import { RuntimeValueType, RuntimeValue, NullValue, FloatValue } from "./values.js";
+import { Identifier } from "../parser/statements/expressions.js"
+import { TokenKind } from "../parser/token.js"
+import { RuntimeValueType, RuntimeValue, NullValue, FloatValue, BooleanValue } from "./values.js";
 import { Environment } from "./environment.js";
 
 export class Interpreter
@@ -87,7 +88,7 @@ export class Interpreter
    */
   evaluateIdentifier(node)
   {
-    return this.env.lookup(node.value);
+    return this.env.lookup(node.name);
   }
 
   /**

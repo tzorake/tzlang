@@ -106,14 +106,6 @@ export class Specialization
      */
     this.kind = kind;
   }
-
-  /**
-   * @returns {string}
-   */
-  toString()
-  {
-    return `<Specialization type=${this.type} kind=${this.kind}>`;
-  }
 }
 
 export class Token 
@@ -139,15 +131,6 @@ export class Token
      */
     this.precedence = precedence;
   }
-
-  /**
-   * @returns {string}
-   */
-  toString()
-  {
-    const value = this.type === TokenKind.Eol ? escape(this.value) : this.value;
-    return `<Token type="${TokenKindAsString(this.type)}" value="${value}">`;
-  }
 }
 
 export class TokenWithSpecialization extends Token 
@@ -166,14 +149,5 @@ export class TokenWithSpecialization extends Token
      * @type {Specialization}
      */
     this.specialization = specialization;
-  }
-
-  /**
-   * @returns {string}
-   */
-  toString() 
-  {
-    const value = this.type === TokenKind.Eol ? escape(this.value) : this.value;
-    return `<Token type="${TokenKindAsString(this.type)}" value="${value}" specialization=${this.specialization}>`;
   }
 }

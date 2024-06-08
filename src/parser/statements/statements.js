@@ -1,9 +1,5 @@
-import { isclass } from "../../parser/utils.js";
+import { TZ_DECLARE_NODE_KIND } from '../macros.js';
 
-/**
- * @param {number}
- */
-let iota = 0;
 /**
  * @enum {number}
  */
@@ -17,26 +13,6 @@ export const NodeKind = {};
 export function NodeKindAsString(kind) 
 {
   return Object.keys(NodeKind).find(key => NodeKind[key] === kind);
-}
-
-/**
- * @param {any} className 
- * 
- * @returns {void}
- */
-export function TZ_DECLARE_NODE_KIND(className)
-{
-  if (isclass(className)) {
-    NodeKind[className.name] = iota++;
-  }
-}
-
-/**
- * @returns {void}
- */
-export function TZ_NOT_IMPLEMENTED()
-{
-  throw new Error("not implemented!");
 }
 
 export class Statement 

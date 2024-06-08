@@ -1,5 +1,6 @@
 import { TokenKind } from '../token.js';
-import { TZ_DECLARE_NODE_KIND, NodeKind, Statement } from './statements.js';
+import { NodeKind, Statement } from './statements.js';
+import { TZ_DECLARE_NODE_KIND } from '../macros.js';
 
 export class Expression extends Statement 
 {

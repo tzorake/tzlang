@@ -11,11 +11,11 @@ export function TZ_NULL()
 /**
  * @param {number} value 
  * 
- * @returns {NumberValue}
+ * @returns {FloatValue}
  */
 export function TZ_NUMBER(value)
 {
-  return new NumberValue(value);
+  return new FloatValue(value);
 }
 
 /**
