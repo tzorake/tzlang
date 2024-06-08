@@ -1,7 +1,20 @@
 import { Lexer } from './lexer.js';
 import { TokenKind, Token, TokenKindAsString } from './token.js';
-import { BinaryExpression, Expression, Identifier, NumericLiteral } from './statements/expressions.js';
-import { Statement, BlockStatement } from './statements/statements.js';
+import { Expression, Statement } from './statements/base.js';
+import { BinaryExpression, Identifier, NumericLiteral, VariableDeclaration, AssignmentExpression } from './statements/expressions.js';
+import { BlockStatement, IfStatement } from './statements/statements.js';
+
+/**
+ * @readonly
+ * @enum {string}
+ */
+export const Keyword = {
+  Let    : "let",
+  Return : "return",
+  If     : "if",
+  Else   : "else",
+  For    : "for",
+};
 
 export class Parser 
 {
@@ -17,15 +30,7 @@ export class Parser
     /**
      * @type {Token}
      */
-    this.token = new Token(TokenKind.Eof);
-  }
-
-  /**
-   * @returns {string}
-   */
-  toString()
-  {
-    return `<Parser lexer=${this.lexer} token=${this.token}>`;
+    this.token = this.lexer.token(TokenKind.Eof);
   }
 
   /**
@@ -68,14 +73,7 @@ export class Parser
 
   parseStatement()
   {    
-    const fud = this.fud();
-    if (fud !== null) {
-      this.advance();
-      
-      return fud;
-    }
-
-    return this.parseExpression();
+    return this.fud() ?? this.parseExpression();
   }
 
   parseBlockStatement(global = false)
@@ -83,6 +81,7 @@ export class Parser
     if (!global) {
       this.eat(TokenKind.OpenCurly);
     }
+    this.skip(TokenKind.Eol);
     
     const statements = [];
     while (global && this.token.type !== TokenKind.Eof || !global && this.token.type !== TokenKind.CloseCurly) {
@@ -106,6 +105,44 @@ export class Parser
   fud()
   {
     switch (this.token.type) {
+      case TokenKind.Identifier: {
+        if (this.token.type === TokenKind.Identifier && this.token.value === Keyword.Let) {
+          this.advance();
+
+          const name = this.token.value;
+          this.eat(TokenKind.Identifier);
+
+          let value = null;
+          if (this.token.type === TokenKind.Equal) {
+            this.advance();
+            value = this.parseExpression(this.token.precedence - 1);
+          }
+
+          return new VariableDeclaration(name, value);
+        }
+        
+        if (this.token.type === TokenKind.Identifier && this.token.value === Keyword.If) {
+          this.advance();
+
+          this.eat(TokenKind.OpenParen);
+          const condition = this.parseExpression();
+          this.eat(TokenKind.CloseParen);
+
+
+          let ifBlock = this.token.type === TokenKind.OpenCurly
+            ? this.parseBlockStatement()
+            : this.parseStatement();
+          let elseBlock = null;
+          if (this.token.type === TokenKind.Identifier && this.token.value === Keyword.Else) {
+            this.advance();
+            elseBlock = this.token.type === TokenKind.OpenCurly
+                ? this.parseBlockStatement()
+                : this.parseStatement();
+          }
+
+          return new IfStatement(condition, ifBlock, elseBlock);
+        }
+      } break;
     }
 
     return null;
@@ -123,7 +160,16 @@ export class Parser
       case TokenKind.Plus:
       case TokenKind.Minus:
       case TokenKind.Asterisk:
-      case TokenKind.Slash: {
+      case TokenKind.Slash:
+      case TokenKind.LessThan:  
+      case TokenKind.LessThanEqual:  
+      case TokenKind.GreaterThan:  
+      case TokenKind.GreaterThanEqual:  
+      case TokenKind.Bar:  
+      case TokenKind.BarBar:  
+      case TokenKind.Ampersand:  
+      case TokenKind.AmpersandAmpersand:
+      case TokenKind.EqualEqual: {
         const token = this.token;
         this.advance();
 
@@ -131,6 +177,16 @@ export class Parser
           token, 
           left, 
           this.parseExpression(token.precedence)
+        );
+      } break;
+
+      case TokenKind.Equal: {
+        const token = this.token;
+        this.advance();
+
+        return new AssignmentExpression(
+          left, 
+          this.parseExpression(token.precedence - 1)
         );
       } break;
     }

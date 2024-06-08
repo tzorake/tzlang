@@ -3,7 +3,7 @@ import { NullValue, FloatValue, BooleanValue } from "./values.js";
 /**
  * @returns {NullValue}
  */
-export function TZ_NULL()
+export function tzNull()
 {
   return new NullValue();
 }
@@ -13,7 +13,7 @@ export function TZ_NULL()
  * 
  * @returns {FloatValue}
  */
-export function TZ_NUMBER(value)
+export function tzFloat(value)
 {
   return new FloatValue(value);
 }
@@ -23,7 +23,7 @@ export function TZ_NUMBER(value)
  * 
  * @returns {BooleanValue}
  */
-export function TZ_BOOLEAN(value)
+export function tzBoolean(value)
 {
   return new BooleanValue(value);
 }

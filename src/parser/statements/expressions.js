@@ -1,18 +1,5 @@
 import { TokenKind } from '../token.js';
-import { NodeKind, Statement } from './statements.js';
-import { TZ_DECLARE_NODE_KIND } from '../macros.js';
-
-export class Expression extends Statement 
-{
-  /**
-   * @constructor
-   * @param {NodeKind} kind
-   */
-  constructor(kind)
-  {
-    super(kind);
-  }
-}
+import { tzDeclareNodeKind, NodeKind, Expression, Statement } from "./base.js";
 
 export class BinaryExpression extends Expression
 {
@@ -24,29 +11,44 @@ export class BinaryExpression extends Expression
    */
   constructor(operator, left, right)
   {
-    super(NodeKind.BinaryExpression);
+  super(NodeKind.BinaryExpression);
+    /**
+     * @type {Token}
+     */
     this.operator = operator;
+    /**
+     * @type {Expression}
+     */
     this.left = left;
+    /**
+     * @type {Expression}
+     */
     this.right = right;
   }
 }
-TZ_DECLARE_NODE_KIND(BinaryExpression);
+tzDeclareNodeKind(BinaryExpression);
 
 export class UnaryExpression extends Expression
 {
   /**
    * @constructor
-   * @param {TokenKind} operator
+   * @param {Token} operator
    * @param {Expression} argument
    */
   constructor(operator, argument)
   {
     super(NodeKind.UnaryExpression);
+    /**
+     * @type {Token}
+     */
     this.operator = operator;
+    /**
+     * @type {Expression}
+     */
     this.argument = argument;
   }
 }
-TZ_DECLARE_NODE_KIND(UnaryExpression);
+tzDeclareNodeKind(UnaryExpression);
 
 export class Identifier extends Expression
 {
@@ -57,10 +59,13 @@ export class Identifier extends Expression
   constructor(name)
   {
     super(NodeKind.Identifier);
+    /**
+     * @type {string}
+     */
     this.name = name;
   }
 }
-TZ_DECLARE_NODE_KIND(Identifier);
+tzDeclareNodeKind(Identifier);
 
 export class Literal extends Expression
 {
@@ -72,6 +77,9 @@ export class Literal extends Expression
   constructor(kind, value)
   {
     super(kind);
+    /**
+     * @type {any}
+     */
     this.value = value;
   }
 }
@@ -87,7 +95,7 @@ export class NumericLiteral extends Literal
     super(NodeKind.NumericLiteral, value);
   }
 }
-TZ_DECLARE_NODE_KIND(NumericLiteral);
+tzDeclareNodeKind(NumericLiteral);
 
 export class StringLiteral extends Literal
 {
@@ -100,4 +108,48 @@ export class StringLiteral extends Literal
     super(NodeKind.StringLiteral, value);
   }
 }
-TZ_DECLARE_NODE_KIND(StringLiteral);
+tzDeclareNodeKind(StringLiteral);
+
+export class VariableDeclaration extends Expression
+{
+  /**
+   * @constructor
+   * @param {string} name
+   * @param {Expression | null} value
+   */
+  constructor(name, value)
+  {
+    super(NodeKind.VariableDeclaration);
+    /**
+     * @type {string}
+     */
+    this.name = name;
+    /**
+     * @type {Expression | null}
+     */
+    this.value = value;
+  }
+}
+tzDeclareNodeKind(VariableDeclaration);
+
+export class AssignmentExpression extends Expression
+{
+  /**
+   * @constructor
+   * @param {Expression} left
+   * @param {Expression} right
+   */
+  constructor(left, right)
+  {
+    super(NodeKind.AssignmentExpression);
+    /**
+     * @type {Expression}
+     */
+    this.left = left;
+    /**
+     * @type {Expression}
+     */
+    this.right = right;
+  }
+}
+tzDeclareNodeKind(AssignmentExpression);

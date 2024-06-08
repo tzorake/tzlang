@@ -1,22 +1,22 @@
 import { Parser } from "../parser/parser.js"
 import { Environment } from "./environment.js"
 import { Interpreter } from "./interpreter.js"
-import { TZ_NULL, TZ_NUMBER, TZ_BOOLEAN, } from "./macros.js";
+import { tzNull, tzFloat, tzBoolean, } from "./macros.js";
 import promptSync from 'prompt-sync';
 
 const prompt = promptSync();
 
-function tzlangRepl() {
+function tzRepl() {
   const env = new Environment();
-  env.defineConstant("null",  TZ_NULL());
-  env.defineConstant("false", TZ_BOOLEAN(false));
-  env.defineConstant("true",  TZ_BOOLEAN(true));
+  env.defineConstant("null",  tzNull());
+  env.defineConstant("false", tzBoolean(false));
+  env.defineConstant("true",  tzBoolean(true));
   const interpreter = new Interpreter(env);
 
   while (true) {
     const data = prompt("> ");
     if (!data || data.includes("exit")) {
-      return 0;
+      break
     }
 
     try {
@@ -32,9 +32,9 @@ function tzlangRepl() {
     }  
   }
 
-  return 1; // unreachable
+  return 0;
 }
 
 (() => {
-  process.exit(tzlangRepl());
+  process.exit(tzRepl());
 })();

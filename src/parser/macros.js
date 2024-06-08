@@ -1,27 +1,9 @@
-import { isclass } from "./utils.js";
-import { NodeKind } from "./statements/statements.js";
-
-/**
- * @param {number}
- */
-let iota = 0;
-
-/**
- * @param {any} className 
- * 
- * @returns {void}
- */
-export function TZ_DECLARE_NODE_KIND(className)
-{
-  if (isclass(className)) {
-    NodeKind[className.name] = iota++;
-  }
-}
+import { NodeKind } from "./statements/base.js";
 
 /**
  * @returns {void}
  */
-export function TZ_LOG(...messages)
+export function tzLog(...messages)
 {
   console.info(...messages);
 }
@@ -29,7 +11,7 @@ export function TZ_LOG(...messages)
 /**
  * @returns {void}
  */
-export function TZ_INSPECT_OBJECT(object)
+export function tzInspectObject(object)
 {
   console.dir(object, { depth: null });
 }
@@ -37,15 +19,15 @@ export function TZ_INSPECT_OBJECT(object)
 /**
  * @returns {void}
  */
-export function TZ_DECLARED_NODE_KINDS()
+export function tzDeclaredNodeKinds()
 {
-  TZ_INSPECT_OBJECT(NodeKind);
+  tzInspectObject(NodeKind);
 }
 
 /**
  * @returns {void}
  */
-export function TZ_NOT_IMPLEMENTED()
+export function tzNotImplemented()
 {
   throw new Error("not implemented!");
 }

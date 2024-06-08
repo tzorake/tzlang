@@ -1,46 +1,46 @@
-import { TZ_DECLARE_NODE_KIND } from '../macros.js';
-
-/**
- * @enum {number}
- */
-export const NodeKind = {};
-
-/**
- * @param {NodeKind} type 
- * 
- * @returns {string | undefined}
- */
-export function NodeKindAsString(kind) 
-{
-  return Object.keys(NodeKind).find(key => NodeKind[key] === kind);
-}
-
-export class Statement 
-{
-  /**
-   * @constructor
-   * @param {NodeKind} kind
-   */
-  constructor(kind)
-  {
-    /**
-     * @type {NodeKind}
-     */
-    this.kind = kind;
-  }
-}
-TZ_DECLARE_NODE_KIND(Statement);
+import { tzDeclareNodeKind, NodeKind, Expression, Statement } from "./base.js";
 
 export class BlockStatement extends Statement
 {
   /**
    * @constructor
-   * @param {NodeKind} kind
+   * @param {Array<Statement>} body
    */
   constructor(body)
   {
     super(NodeKind.BlockStatement);
+    /**
+     * @type {Array<Statement>}
+     */
     this.body = body;
   }
 }
-TZ_DECLARE_NODE_KIND(BlockStatement);
+tzDeclareNodeKind(BlockStatement);
+
+export class IfStatement extends Statement
+{
+  /**
+   * @constructor
+   * @param {Expression} condition
+   * @param {BlockStatement} ifBody
+   * @param {BlockStatement} elseBody
+   */
+  constructor(condition, ifBody, elseBody)
+  {
+    super(NodeKind.IfStatement);
+    /**
+     * @type {Expression}
+     */
+    this.condition = condition;
+    /**
+     * @type {BlockStatement}
+     */
+    this.ifBody = ifBody;
+    /**
+     * @type {BlockStatement}
+     */
+    this.elseBody = elseBody;
+  }
+}
+tzDeclareNodeKind(IfStatement);
+

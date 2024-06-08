@@ -1,9 +1,12 @@
 import fs from "fs"
 
-import { Lexer } from "./src/parser/lexer.js"
 import { Parser } from "./src/parser/parser.js"
+import { Environment } from "./src/runtime/environment.js"
+import { Interpreter } from "./src/runtime/interpreter.js"
+import { tzNull, tzFloat, tzBoolean } from "./src/runtime/macros.js"
+import { tzInspectObject } from "./src/parser/macros.js"
 
-function tzlangCompile(argv)
+function tzInterpret(argv)
 {
   const path = argv[2];
   let data = "";
@@ -17,22 +20,21 @@ function tzlangCompile(argv)
     throw new Error(`file does not exist: ${path}`);
   }
 
-  const lexer = new Lexer(data);
+  const parser = new Parser();
+  const root = parser.parse(data);
+  const env = new Environment();
+  env.defineConstant("null",  tzNull());
+  env.defineConstant("false", tzBoolean(false));
+  env.defineConstant("true",  tzBoolean(true));
+  env.define("x", tzFloat(3));
+  env.define("y", tzFloat(8));
 
-  let token;
-  while(!lexer.exhasted) {
-    token = lexer.nextToken()
-    console.log(token);
-  }
-  lexer.reset();
+  const interpreter = new Interpreter(env);
+  const result = interpreter.evaluate(root);
 
-  const parser = new Parser(lexer);
-  const root = parser.parse();
-  
-  console.log("");
-  console.log(root);
+  tzInspectObject(result);
 }
 
 (() => {
-  tzlangCompile(process.argv);
+  tzInterpret(process.argv);
 })();

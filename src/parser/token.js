@@ -1,5 +1,3 @@
-import { escape } from "./utils.js"
-
 /**
  * @param {number}
  */
@@ -30,10 +28,16 @@ export const TokenKind = {
   Slash               : iota++,
   Percent             : iota++,
   Ampersand           : iota++,
+  AmpersandAmpersand  : iota++,
   Bar                 : iota++,
+  BarBar              : iota++,
   Equal               : iota++,
+  EqualEqual          : iota++,
+  EqualGreaterThan    : iota++,
   LessThan            : iota++,
+  LessThanEqual       : iota++,
   GreaterThan         : iota++,
+  GreaterThanEqual    : iota++,
   Tilde               : iota++,
   Hash                : iota++,
   ExclamationMark     : iota++,

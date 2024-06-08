@@ -1,4 +1,4 @@
-import { isdigit, isalpha, isalnum, isbinary, ishex, isstrterm, escape } from "./utils.js"
+import { isdigit, isalpha, isalnum, isbinary, ishex, isstrterm } from "./utils.js"
 import { Token, TokenWithSpecialization, TokenKind, Specialization, NumericLiteralType, IntegerLiteralKind, RealLiteralKind } from './token.js';
 
 export class Lexer
@@ -32,15 +32,6 @@ export class Lexer
   }
 
   /**
-   * @returns {string}
-   */
-  toString()
-  {
-    const source = escape(this.source);
-    return `<Lexer source="${source}" index=${this.index} char="${this.char}" exhasted=${this.exhasted}>`;
-  }
-
-  /**
    * @returns {void}
    */
   reset()
@@ -68,7 +59,7 @@ export class Lexer
    * 
    * @returns {Token}
    */
-  token(type, value, precedence, specialization = null)
+  token(type, value, precedence = 0, specialization = null)
   {
     return specialization 
       ? new TokenWithSpecialization(type, value, precedence, specialization) 
@@ -163,6 +154,12 @@ export class Lexer
 
       if (this.checkedPeek(1, "b")) {
         return this.lexBinary();
+      }
+
+      if (!isdigit(this.peek(1))) {
+        return this.advanceWith(
+          this.token(TokenKind.NumericLiteral, "0")
+        );
       }
 
       throw new Error("invalid number");
@@ -328,31 +325,63 @@ export class Lexer
         } break;
 
         case "=": {
-          return this.advanceCurrent(TokenKind.Equal);
+          if (this.peek(1) === ">") {
+            this.advance();
+
+            return this.advanceWith(
+              this.token(TokenKind.EqualGreaterThan, "=>")
+            );
+          }
+
+          if (this.peek(1) === "=") {
+            this.advance();
+
+            return this.advanceWith(
+              this.token(TokenKind.EqualEqual, "==", 8)
+            );
+          }
+
+          return this.advanceCurrent(TokenKind.Equal, 1);
         } break;
 
         case "&": {
-          return this.advanceCurrent(TokenKind.Ampersand);
+          if (this.peek(1) === "&") {
+            this.advance();
+
+            return this.advanceWith(
+              this.token(TokenKind.AmpersandAmpersand, "&&", 5)
+            );
+          }
+
+          return this.advanceCurrent(TokenKind.Ampersand, 7);
         } break;
 
         case "|": {
-          return this.advanceCurrent(TokenKind.Bar);
+          if (this.peek(1) === "|") {
+            this.advance();
+
+            return this.advanceWith(
+              this.token(TokenKind.BarBar, "||", 4)
+            );
+          }
+
+          return this.advanceCurrent(TokenKind.Bar, 6);
         } break;
 
         case "+": {
-          return this.advanceCurrent(TokenKind.Plus, 1);
+          return this.advanceCurrent(TokenKind.Plus, 10);
         } break;
 
         case "-": {
-          return this.advanceCurrent(TokenKind.Minus, 1);
+          return this.advanceCurrent(TokenKind.Minus, 10);
         } break;
 
         case "*": {
-          return this.advanceCurrent(TokenKind.Asterisk, 2);
+          return this.advanceCurrent(TokenKind.Asterisk, 20);
         } break;
 
         case "/": {
-          return this.advanceCurrent(TokenKind.Slash, 2);
+          return this.advanceCurrent(TokenKind.Slash, 20);
         } break;
 
         case "(": {
@@ -361,6 +390,14 @@ export class Lexer
 
         case ")": {
           return this.advanceCurrent(TokenKind.CloseParen);
+        } break;
+
+        case "[": {
+          return this.advanceCurrent(TokenKind.OpenBracket);
+        } break;
+
+        case "]": {
+          return this.advanceCurrent(TokenKind.CloseBracket);
         } break;
 
         case "{": {
@@ -372,11 +409,27 @@ export class Lexer
         } break;
 
         case "<": {
-          return this.advanceCurrent(TokenKind.LessThan);
+          if (this.peek(1) === "=") {
+            this.advance();
+
+            return this.advanceWith(
+              this.token(TokenKind.LessThanEqual, "<=", 9)
+            );
+          }
+
+          return this.advanceCurrent(TokenKind.LessThan, 9);
         } break;
 
         case ">": {
-          return this.advanceCurrent(TokenKind.GreaterThan);
+          if (this.peek(1) === "=") {
+            this.advance();
+
+            return this.advanceWith(
+              this.token(TokenKind.GreaterThanEqual, ">=", 9)
+            );
+          }
+
+          return this.advanceCurrent(TokenKind.GreaterThan, 9);
         } break;
 
         case ";": {
