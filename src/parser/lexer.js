@@ -339,12 +339,12 @@ export class Lexer
           return this.advanceCurrent(TokenKind.Bar);
         } break;
 
-        case "-": {
-          return this.advanceCurrent(TokenKind.Minus);
-        } break;
-
         case "+": {
           return this.advanceCurrent(TokenKind.Plus, 1);
+        } break;
+
+        case "-": {
+          return this.advanceCurrent(TokenKind.Minus, 1);
         } break;
 
         case "*": {
@@ -352,7 +352,7 @@ export class Lexer
         } break;
 
         case "/": {
-          return this.advanceCurrent(TokenKind.Slash);
+          return this.advanceCurrent(TokenKind.Slash, 2);
         } break;
 
         case "(": {

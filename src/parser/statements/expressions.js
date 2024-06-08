@@ -13,20 +13,6 @@ export class Expression extends Statement
   }
 }
 
-export class BlockStatement extends Expression
-{
-  /**
-   * @constructor
-   * @param {NodeKind} kind
-   */
-  constructor(body)
-  {
-    super(NodeKind.BlockStatement);
-    this.body = body;
-  }
-}
-TZ_DECLARE_NODE_KIND(BlockStatement);
-
 export class BinaryExpression extends Expression
 {
   /**

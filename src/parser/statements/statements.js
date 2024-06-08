@@ -1,4 +1,3 @@
-import { Token, TokenKind } from "../token.js";
 import { isclass } from "../../parser/utils.js";
 
 /**
@@ -8,18 +7,7 @@ let iota = 0;
 /**
  * @enum {number}
  */
-export const NodeKind = {
-  // Statement            : iota++,
-  // BlockStatement       : iota++,
-
-  // Identifier           : iota++,
-  // NumericLiteral       : iota++,
-  // StringLiteral        : iota++,
-
-  // VariableDeclaration  : iota++,
-  // BinaryExpression     : iota++,
-  // AssignmentExpression : iota++,
-};
+export const NodeKind = {};
 
 /**
  * @param {NodeKind} type 
@@ -66,3 +54,17 @@ export class Statement
   }
 }
 TZ_DECLARE_NODE_KIND(Statement);
+
+export class BlockStatement extends Statement
+{
+  /**
+   * @constructor
+   * @param {NodeKind} kind
+   */
+  constructor(body)
+  {
+    super(NodeKind.BlockStatement);
+    this.body = body;
+  }
+}
+TZ_DECLARE_NODE_KIND(BlockStatement);

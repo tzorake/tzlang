@@ -1,7 +1,7 @@
 import { Lexer } from './lexer.js';
 import { TokenKind, Token, TokenKindAsString } from './token.js';
-import { BinaryExpression, BlockStatement, Expression, Identifier, NumericLiteral } from './statements/expressions.js';
-import { Statement } from './statements/statements.js';
+import { BinaryExpression, Expression, Identifier, NumericLiteral } from './statements/expressions.js';
+import { Statement, BlockStatement } from './statements/statements.js';
 
 export class Parser 
 {
@@ -157,6 +157,14 @@ export class Parser
         this.advance();
 
         return new NumericLiteral(token.value);
+      } break;
+
+      case TokenKind.OpenParen: {
+        this.advance();
+        const expression = this.parseExpression();
+        this.eat(TokenKind.CloseParen);
+
+        return expression;
       } break;
     }
 
