@@ -5,18 +5,17 @@ export class Lexer
 {
   /**
    * @constructor
-   * @param {string} source
    */
-  constructor(source)
+  constructor()
   {
     /**
      * @type {string}
      */
-    this.source = source;
+    this.source = "";
     /**
      * @type {number}
      */
-    this.size = source.length;
+    this.size = 0;
 
     /**
      * @type {number}
@@ -38,7 +37,7 @@ export class Lexer
   toString()
   {
     const source = escape(this.source);
-    return `<Lexer source='${source}' index=${this.index} char='${this.char}' exhasted=${this.exhasted}/>`;
+    return `<Lexer source="${source}" index=${this.index} char="${this.char}" exhasted=${this.exhasted}>`;
   }
 
   /**
@@ -52,17 +51,28 @@ export class Lexer
   }
 
   /**
-   * @param {string} value
+   * @returns {string}
+   */
+  setSource(source)
+  {
+    this.source = source;
+    this.size = source.length;
+    this.reset();
+  }
+
+  /**
    * @param {TokenKind} type
+   * @param {string} value
+   * @param {number} precedence
    * @param {Specialization} specialization
    * 
    * @returns {Token}
    */
-  token(value, type, specialization = null)
+  token(type, value, precedence, specialization = null)
   {
     return specialization 
-      ? new TokenWithSpecialization(value, type, specialization) 
-      : new Token(value, type);
+      ? new TokenWithSpecialization(type, value, precedence, specialization) 
+      : new Token(type, value, precedence);
   }
 
   /**
@@ -118,12 +128,12 @@ export class Lexer
    * 
    * @returns {Token}
    */
-  advanceCurrent(type)
+  advanceCurrent(type, precedence)
   {
     const value = this.char;
     this.advance();
     
-    return this.token(value, type);
+    return this.token(type, value, precedence);
   }
 
   /**
@@ -137,7 +147,7 @@ export class Lexer
       this.advance();
     } while (isalnum(this.char));
 
-    return this.token(value, TokenKind.Identifier);
+    return this.token(TokenKind.Identifier, value);
   }
 
   /**
@@ -199,8 +209,8 @@ export class Lexer
     }
 
     return this.token(
-      value, 
       TokenKind.NumericLiteral, 
+      value, 
       new Specialization(
         isFloat ? NumericLiteralType.Real : NumericLiteralType.Integer,
         isFloat ? (isScientific ? RealLiteralKind.Regular : RealLiteralKind.Scientific)
@@ -229,8 +239,8 @@ export class Lexer
     } while (ishex(this.char));
 
     return this.token(
-      value, 
       TokenKind.NumericLiteral, 
+      value, 
       new Specialization(
         NumericLiteralType.Integer, 
         IntegerLiteralKind.Hex
@@ -258,8 +268,8 @@ export class Lexer
     } while (isbinary(this.char));
 
     return this.token(
-      value, 
       TokenKind.NumericLiteral, 
+      value, 
       new Specialization(
         NumericLiteralType.Integer, 
         IntegerLiteralKind.Binary
@@ -289,7 +299,7 @@ export class Lexer
 
     this.advance();
 
-    return this.token(value, TokenKind.StringLiteral);
+    return this.token(TokenKind.StringLiteral, value);
   }
 
   /**
@@ -334,11 +344,11 @@ export class Lexer
         } break;
 
         case "+": {
-          return this.advanceCurrent(TokenKind.Plus);
+          return this.advanceCurrent(TokenKind.Plus, 1);
         } break;
 
         case "*": {
-          return this.advanceCurrent(TokenKind.Asterisk);
+          return this.advanceCurrent(TokenKind.Asterisk, 2);
         } break;
 
         case "/": {
@@ -374,7 +384,7 @@ export class Lexer
         } break;
 
         case "\n": {
-          return this.advanceCurrent(TokenKind.NewLine);
+          return this.advanceCurrent(TokenKind.Eol);
         } break;
 
         case ":": {
@@ -404,7 +414,7 @@ export class Lexer
     }
 
     this.exhasted = true;
-    return this.token(undefined, TokenKind.Eof);
+    return this.advanceCurrent(TokenKind.Eof);
   }
 
   /**

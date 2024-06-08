@@ -17,35 +17,33 @@ export const TokenKind = {
   CloseParen          : iota++,
   OpenCurly           : iota++,
   CloseCurly          : iota++,
-
-  Colon               : iota++,
-  NewLine             : iota++,
-  Semicolon           : iota++,
-  Comma               : iota++,
-  Dot                 : iota++,
+  OpenBracket         : iota++,
+  CloseBracket        : iota++,
 
   Apostrophe          : iota++,
   QuotationMark       : iota++,
   GraveAccent         : iota++,
-
+  
   Plus                : iota++,
-  DoublePlus          : iota++,
   Minus               : iota++,
-  DoubleMinus         : iota++,
   Asterisk            : iota++,
   Slash               : iota++,
   Percent             : iota++,
-  NotEqual            : iota++,
-  DoubleEqual         : iota++,
+  Ampersand           : iota++,
+  Bar                 : iota++,
   Equal               : iota++,
-  Arrow               : iota++,
   LessThan            : iota++,
   GreaterThan         : iota++,
-  Ampersand           : iota++,
-  DoubleAmpersand     : iota++,
-  Bar                 : iota++,
-  DoubleBar           : iota++,
+  Tilde               : iota++,
+  Hash                : iota++,
+  ExclamationMark     : iota++,
+  QuestionMark        : iota++,
+  Colon               : iota++,
+  Semicolon           : iota++,
+  Comma               : iota++,
+  Dot                 : iota++,
 
+  Eol                 : iota++,
   Eof                 : iota++,
 };
 
@@ -114,7 +112,7 @@ export class Specialization
    */
   toString()
   {
-    return `<Specialization type='${this.type}' kind='${this.kind}'>`;
+    return `<Specialization type=${this.type} kind=${this.kind}>`;
   }
 }
 
@@ -122,19 +120,24 @@ export class Token
 {
   /**
    * @constructor
-   * @param {string} value
    * @param {TokenKind} type
+   * @param {string} value
+   * @param {number} precedence
    */
-  constructor(value, type)
+  constructor(type, value, precedence = 0)
   {
+    /**
+     * @type {TokenKind}
+     */
+    this.type = type;
     /**
      * @type {string}
      */
     this.value = value;
     /**
-     * @type {TokenKind}
+     * @type {number}
      */
-    this.type = type;
+    this.precedence = precedence;
   }
 
   /**
@@ -142,8 +145,8 @@ export class Token
    */
   toString()
   {
-    const value = this.type === TokenKind.NewLine ? escape(this.value) : this.value;
-    return `<Token value='${value}' type='${TokenKindAsString(this.type)}'>`;
+    const value = this.type === TokenKind.Eol ? escape(this.value) : this.value;
+    return `<Token type="${TokenKindAsString(this.type)}" value="${value}">`;
   }
 }
 
@@ -151,13 +154,14 @@ export class TokenWithSpecialization extends Token
 {
   /**
    * @constructor
-   * @param {string} value
    * @param {TokenKind} type
+   * @param {string} value
+   * @param {number} precedence
    * @param {Specialization} specialization
    */
-  constructor(value, type, specialization) 
+  constructor(type, value, precedence, specialization) 
   {
-    super(value, type);
+    super(type, value, precedence);
     /**
      * @type {Specialization}
      */
@@ -169,7 +173,7 @@ export class TokenWithSpecialization extends Token
    */
   toString() 
   {
-    const value = this.type === TokenKind.NewLine ? escape(this.value) : this.value;
-    return `<Token value='${value}' type='${TokenKindAsString(this.type)}' specialization='${this.specialization}'>`;
+    const value = this.type === TokenKind.Eol ? escape(this.value) : this.value;
+    return `<Token type="${TokenKindAsString(this.type)}" value="${value}" specialization=${this.specialization}>`;
   }
 }

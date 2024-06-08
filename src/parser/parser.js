@@ -1,55 +1,171 @@
 import { Lexer } from './lexer.js';
 import { TokenKind, Token, TokenKindAsString } from './token.js';
-import { BlockStatement } from './statements/expressions.js';
+import { BinaryExpression, BlockStatement, Expression, Identifier, NumericLiteral } from './statements/expressions.js';
+import { Statement } from './statements/statements.js';
 
 export class Parser 
 {
   /**
    * @constructor
-   * @param {Lexer} lexer
    */
-  constructor(lexer) 
+  constructor() 
   {
     /**
      * @type {Lexer}
      */
-    this.lexer = lexer;
+    this.lexer = new Lexer();
     /**
      * @type {Token}
      */
-    this.token = this.lexer.nextToken();
+    this.token = new Token(TokenKind.Eof);
+  }
+
+  /**
+   * @returns {string}
+   */
+  toString()
+  {
+    return `<Parser lexer=${this.lexer} token=${this.token}>`;
   }
 
   /**
    * @throws {Error}
-   * @returns {BlockExpression}
+   * @returns {void}
    */
   reset()
   {
     this.lexer.reset();
+    this.advance();
+  }
+
+  advance()
+  {
     this.token = this.lexer.nextToken();
   }
 
   /**
    * @throws {Error}
-   * @returns {Program}
+   * @returns {BlockStatement}
    */
-  parse() 
+  parse(source) 
   {
+    this.lexer.setSource(source);
+    this.reset();
+
+    return this.parseBlockStatement(true);
+  }
+
+  parseExpression(precedence = 0)
+  {
+    let left = this.nud();
+
+    while (precedence < this.token.precedence) {
+      left = this.led(left);
+    }
+
+    return left;
+  }
+
+  parseStatement()
+  {    
+    const fud = this.fud();
+    if (fud !== null) {
+      this.advance();
+      
+      return fud;
+    }
+
+    return this.parseExpression();
+  }
+
+  parseBlockStatement(global = false)
+  {
+    if (!global) {
+      this.eat(TokenKind.OpenCurly);
+    }
+    
     const statements = [];
+    while (global && this.token.type !== TokenKind.Eof || !global && this.token.type !== TokenKind.CloseCurly) {
+      const statement = this.parseStatement();
+      statements.push(statement);
 
-    // while (!this.lexer.exhasted) {
-    //   const statement = this.parseStatement();
+      this.skip(TokenKind.Eol);
+    }
 
-    //   if (statement) {
-    //     statements.push(statement);
-    //   }
-    // }
+    if (!global) {
+      this.eat(TokenKind.CloseCurly);
+    }
 
     return new BlockStatement(statements);
   }
+  
+  /**
+   * @throws {Error}
+   * @returns {Statement | null}
+   */
+  fud()
+  {
+    switch (this.token.type) {
+    }
+
+    return null;
+  }
 
   /**
+   * @param {Expression} left
+   * 
+   * @throws {Error}
+   * @returns {Expression | null}
+   */
+  led(left)
+  {
+    switch (this.token.type) {
+      case TokenKind.Plus:
+      case TokenKind.Minus:
+      case TokenKind.Asterisk:
+      case TokenKind.Slash: {
+        const token = this.token;
+        this.advance();
+
+        return new BinaryExpression(
+          token, 
+          left, 
+          this.parseExpression(token.precedence)
+        );
+      } break;
+    }
+
+    throw new Error(`unexpected token: ${TokenKindAsString(this.token.type)}`);
+  }
+
+  /**
+   * @throws {Error}
+   * @returns {Expression | null}
+   */
+  nud()
+  {
+    switch (this.token.type) {
+      case TokenKind.Identifier: {
+        const token = this.token;
+        this.advance();
+
+        return new Identifier(token.value);
+      } break;
+
+      case TokenKind.NumericLiteral: {
+        const token = this.token;
+        this.advance();
+
+        return new NumericLiteral(token.value);
+      } break;
+    }
+
+    return null;
+  }
+
+  /**
+   * @param {TokenKind} type
+   * 
    * @throws {Error}
    * @returns {void}
    */
@@ -63,20 +179,16 @@ export class Parser
     this.token = this.lexer.nextToken();
   }
 
+    /**
+   * @param {TokenKind} type
+   * 
+   * @throws {Error}
+   * @returns {void}
+   */
   skip(type)
   {
     while (this.token.type === type) {
       this.token = this.lexer.nextToken();
     }
-  }
-
-  /**
-   * @param {number} [offset=0]
-   * 
-   * @returns {string | undefined}
-   */
-  peek(offset = 0)
-  {
-    return this.lexer.peek(offset);
   }
 }

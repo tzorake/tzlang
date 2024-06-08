@@ -43,6 +43,14 @@ export function TZ_DECLARE_NODE_KIND(className)
   }
 }
 
+/**
+ * @returns {void}
+ */
+export function TZ_NOT_IMPLEMENTED()
+{
+  throw new Error("not implemented!");
+}
+
 export class Statement 
 {
   /**

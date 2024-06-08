@@ -5,36 +5,37 @@ import { Parser } from "../src/parser/parser.js"
 // import { TZ_NULL, TZ_NUMBER, TZ_BOOLEAN } from "../src/runtime/macros.js"
 
 const tests = {};
+const source = `z * x + 3 * y`;
 
 function createTest(name, fn) {
   tests[name] = fn;
 }
 
 createTest("test__lexer_execution", () => {
-  const data = "(null + true - 13) * 3.14 / 0x1f1f";
-  const lexer = new Lexer(data);
+  // const source = "(null + true - 13) * 3.14159 / 0x1f1f";
+  const lexer = new Lexer();
+  lexer.setSource(source);
   
   let token;
   while(!lexer.exhasted) {
     token = lexer.nextToken();
-    console.log(token);
+    console.log(`${token}`);
   }
   console.log("");
 });
 
 createTest("test__parser_execution", () => {
-  const data = "(null + true - 13) * 3.14 / 0x1f1f";
-  const lexer = new Lexer(data);
-  const parser = new Parser(lexer);
-  const root = parser.parse();
+  // const source = "(null + true - 13) * 3.14159 / 0x1f1f";
+  const parser = new Parser();
+  const root = parser.parse(source);
 
-  console.log(root);
+  console.dir(root, { depth: null });
   console.log("");
 });
 
 // createTest("test__interpreter_execution", () => {
-//   const data = "x + y";
-//   const lexer = new Lexer(data);
+//   const source = "x + y";
+//   const lexer = new Lexer(source);
 //   const parser = new Parser(lexer);
 //   const root = parser.parse();
 
