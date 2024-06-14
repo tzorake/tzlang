@@ -2,7 +2,7 @@ import { Lexer } from './lexer.js';
 import { TokenKind, Token, TokenKindAsString } from './token.js';
 import { Expression, Statement } from './statements/base.js';
 import { BinaryExpression, Identifier, NumericLiteral, VariableDeclaration, AssignmentExpression } from './statements/expressions.js';
-import { BlockStatement, IfStatement } from './statements/statements.js';
+import { BlockStatement, IfStatement, ForStatement } from './statements/statements.js';
 
 /**
  * @readonly
@@ -141,6 +141,20 @@ export class Parser
           }
 
           return new IfStatement(condition, ifBlock, elseBlock);
+        }
+
+        if (this.token.type === TokenKind.Identifier && this.token.value === Keyword.For) {
+          this.advance();
+          
+          this.eat(TokenKind.OpenParen);
+          const condition = this.parseExpression();
+          this.eat(TokenKind.CloseParen);
+
+          const block = this.token.type === TokenKind.OpenCurly
+            ? this.parseBlockStatement()
+            : this.parseStatement();
+
+          return new ForStatement(condition, block);
         }
       } break;
     }

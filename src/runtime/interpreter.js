@@ -1,9 +1,10 @@
 import { TokenKind, TokenKindAsString } from "../parser/token.js"
 import { NodeKind, NodeKindAsString, Statement } from "../parser/statements/base.js";
 import { Identifier, VariableDeclaration } from "../parser/statements/expressions.js"
-import { BlockStatement, IfStatement } from "../parser/statements/statements.js"
+import { BlockStatement, IfStatement, ForStatement } from "../parser/statements/statements.js"
 import { RuntimeValueType, RuntimeValue, NullValue, FloatValue, BooleanValue } from "./values.js";
 import { Environment } from "./environment.js";
+import { tzNull } from "./macros.js";
 
 export class Interpreter
 {
@@ -41,6 +42,10 @@ export class Interpreter
 
       case NodeKind.IfStatement: {
         return this.evaluateIfStatement(node);
+      } break;
+
+      case NodeKind.ForStatement: {
+        return this.evaluateForStatement(node);
       } break;
 
       case NodeKind.BinaryExpression: {
@@ -110,7 +115,7 @@ export class Interpreter
     return this.env.assign(identifier.name, value);
   }
 
-    /**
+  /**
    * @param {IfStatement} node
    * 
    * @throws {Error}
@@ -124,11 +129,32 @@ export class Interpreter
         ? this.evaluate(node.ifBody)
         : node.elseBody 
           ? this.evaluate(node.elseBody) 
-          : new NullValue();
+          : tzNull();
     }
 
     throw new Error(`condition must be boolean: ${node.condition}`);
   }
+
+    /**
+   * @param {ForStatement} node
+   * 
+   * @throws {Error}
+   * @returns {void}
+   */
+    evaluateForStatement(node)
+    {
+      let condition = this.evaluate(node.condition);
+      if (condition.type !== RuntimeValueType.Boolean) {
+        throw new Error(`condition must be boolean: ${node.condition}`);
+      }
+
+      while (condition.value) {
+        this.evaluate(node.body);
+        condition = this.evaluate(node.condition)
+      }
+
+      return tzNull();
+    }
 
   /**
    * @param {BinaryExpression} node

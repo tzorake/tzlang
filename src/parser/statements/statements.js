@@ -44,3 +44,25 @@ export class IfStatement extends Statement
 }
 tzDeclareNodeKind(IfStatement);
 
+export class ForStatement extends Statement
+{
+  /**
+   * @constructor
+   * @param {Expression} condition
+   * @param {BlockStatement} body
+   */
+  constructor(condition, body)
+  {
+    super(NodeKind.ForStatement);
+    /**
+     * @type {Expression}
+     */
+    this.condition = condition;
+    /**
+     * @type {BlockStatement}
+     */
+    this.body = body;
+  }
+}
+tzDeclareNodeKind(ForStatement);
+
