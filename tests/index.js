@@ -16,7 +16,7 @@ createTest("test__lexer_execution", () => {
   lexer.setSource(source);
   
   let token;
-  while(!lexer.exhasted) {
+  while(!lexer.state.exhasted) {
     token = lexer.nextToken();
     console.dir(token, { depth: null });
   }

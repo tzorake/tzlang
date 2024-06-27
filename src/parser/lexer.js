@@ -1,7 +1,7 @@
 import { isdigit, isalpha, isalnum, isbinary, ishex, isstrterm } from "./utils.js"
 import { Token, TokenWithSpecialization, TokenKind, Specialization, NumericLiteralType, IntegerLiteralKind, RealLiteralKind } from './token.js';
 
-export class Lexer
+export class LexerState
 {
   /**
    * @constructor
@@ -32,23 +32,95 @@ export class Lexer
   }
 
   /**
+   * @returns {LexerState}
+   */
+  copy()
+  {
+    const state = new LexerState();
+    state.source = this.source;
+    state.size = this.size;
+    state.index = this.index;
+    state.char = this.char;
+    state.exhasted = this.exhasted;
+
+    return state;
+  }
+
+  /**
    * @returns {void}
    */
   reset()
   {
+    this.source = "";
+    this.size = 0;
+
     this.index = 0;
     this.char = this.source[this.index];
     this.exhasted = false;
   }
+}
+
+export class Lexer
+{
+  /**
+   * @constructor
+   */
+  constructor()
+  {
+    /**
+     * @type {LexerState}
+     */
+    this.state = new LexerState();
+    /**
+     * @type {Array<LexerState>} 
+     */
+    this.stack = [];
+  }
 
   /**
-   * @returns {string}
+   * @returns {Lexer}
+   */
+  save()
+  {
+    this.stack.push(
+      this.state.copy()
+    );
+
+    return this;
+  }
+
+  /**
+   * @returns {Lexer}
+   */
+  restore()
+  {
+    if (this.stack.length > 0) {
+      this.state = this.stack.pop();
+    }
+
+    return this;
+  }
+
+  /**
+   * @returns {void}
+   */
+  reset()
+  {
+    this.state.reset();
+  }
+
+  /**
+   * @param {string} source
+   * 
+   * @returns {void}
    */
   setSource(source)
   {
-    this.source = source;
-    this.size = source.length;
-    this.reset();
+    this.state.reset();
+    this.state.source = source;
+    this.state.size = source.length;
+    this.state.index = 0;
+    this.state.char = this.state.source[this.state.index];
   }
 
   /**
@@ -71,9 +143,9 @@ export class Lexer
    */
   advance()
   {
-    if (this.index < this.size && this.char != undefined) {
-      this.index++;
-      this.char = this.source[this.index];
+    if (this.state.index < this.state.size && this.state.char != undefined) {
+      this.state.index++;
+      this.state.char = this.state.source[this.state.index];
     }
   }
 
@@ -96,7 +168,7 @@ export class Lexer
    */
   peek(offset = 0)
   {
-    return this.source[this.index + offset];
+    return this.state.source[this.state.index + offset];
   }
 
   /**
@@ -107,7 +179,7 @@ export class Lexer
    */
   checkedPeek(offset = 0, char)
   {
-    if (this.index + offset >= this.size) {
+    if (this.state.index + offset >= this.state.size) {
       return false;
     }
 
@@ -121,7 +193,7 @@ export class Lexer
    */
   advanceCurrent(type, precedence)
   {
-    const value = this.char;
+    const value = this.state.char;
     this.advance();
     
     return this.token(type, value, precedence);
@@ -134,9 +206,9 @@ export class Lexer
   {
     let value = "";
     do {
-      value += this.char;
+      value += this.state.char;
       this.advance();
-    } while (isalnum(this.char));
+    } while (isalnum(this.state.char));
 
     return this.token(TokenKind.Identifier, value);
   }
@@ -168,41 +240,41 @@ export class Lexer
     let value = "";
 
     do {
-      value += this.char;
+      value += this.state.char;
       this.advance();
-    } while (isdigit(this.char));
+    } while (isdigit(this.state.char));
 
     let isFloat = false;
     let isScientific = false;
 
-    if (this.char === ".") {
+    if (this.state.char === ".") {
       isFloat = true;
       isScientific = false;
 
-      value += this.char;
+      value += this.state.char;
       this.advance();
 
       do {
-        value += this.char;
+        value += this.state.char;
         this.advance();
-      } while (isdigit(this.char));
+      } while (isdigit(this.state.char));
     }
 
-    if (this.char === "e" || this.char === "E") {
+    if (this.state.char === "e" || this.state.char === "E") {
       isFloat = true;
       isScientific = true;
 
-      value += this.char;
+      value += this.state.char;
       this.advance();
-      if (this.char === "+" || this.char === "-") {
-        value += this.char;
+      if (this.state.char === "+" || this.state.char === "-") {
+        value += this.state.char;
         this.advance();
       }
       
       do {
-        value += this.char;
+        value += this.state.char;
         this.advance();
-      } while (isdigit(this.char));
+      } while (isdigit(this.state.char));
     }
 
     return this.token(
@@ -226,14 +298,14 @@ export class Lexer
     this.advance();
     this.advance();
 
-    if (!ishex(this.char)) {
+    if (!ishex(this.state.char)) {
       throw new Error("unexpected digit after 0x");
     }
 
     do {
-      value += this.char;
+      value += this.state.char;
       this.advance();
-    } while (ishex(this.char));
+    } while (ishex(this.state.char));
 
     return this.token(
       TokenKind.NumericLiteral, 
@@ -255,14 +327,14 @@ export class Lexer
     this.advance();
     this.advance();
 
-    if (!isbinary(this.char)) {
+    if (!isbinary(this.state.char)) {
       throw new Error("unexpected digit after 0b");
     }
 
     do {
-      value += this.char;
+      value += this.state.char;
       this.advance();
-    } while (isbinary(this.char));
+    } while (isbinary(this.state.char));
 
     return this.token(
       TokenKind.NumericLiteral, 
@@ -280,17 +352,17 @@ export class Lexer
    */
   lexString()
   {
-    const startWith = this.char;
+    const startsWith = this.state.char;
 
     let value = "";
     this.advance();
 
-    while (this.char !== undefined && this.char !== startWith) {
-      value += this.char;
+    while (this.state.char !== undefined && this.state.char !== startsWith) {
+      value += this.state.char;
       this.advance();
     }
 
-    if (this.char === undefined) {
+    if (this.state.char === undefined) {
       throw new Error("unterminated string");
     }
 
@@ -305,22 +377,22 @@ export class Lexer
    */
   nextToken()
   {
-    while (this.char != undefined) {
+    while (this.state.char != undefined) {
       this.skipWhitespaces();
 
-      if (isstrterm(this.char)) {
+      if (isstrterm(this.state.char)) {
         return this.lexString();
       }
 
-      if (isalpha(this.char)) {
+      if (isalpha(this.state.char)) {
         return this.lexIdentifier();
       }
 
-      if (isdigit(this.char)) {
+      if (isdigit(this.state.char)) {
         return this.lexNumber();
       }
 
-      switch (this.char) {
+      switch (this.state.char) {
         case undefined: {
         } break;
 
@@ -461,12 +533,12 @@ export class Lexer
         } break;
 
         default: {
-          throw new Error(`unexpected character: '${this.char}'`);
+          throw new Error(`unexpected character: '${this.state.char}'`);
         }
       }
     }
 
-    this.exhasted = true;
+    this.state.exhasted = true;
     return this.advanceCurrent(TokenKind.Eof);
   }
 
@@ -475,7 +547,7 @@ export class Lexer
    */
   skipWhitespaces()
   {
-    while (this.char == " " || this.char == "\t" || this.char == "\r") {
+    while (this.state.char == " " || this.state.char == "\t" || this.state.char == "\r") {
       this.advance();
     }
   }

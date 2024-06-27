@@ -11,7 +11,7 @@ export class BinaryExpression extends Expression
    */
   constructor(operator, left, right)
   {
-  super(NodeKind.BinaryExpression);
+    super(NodeKind.BinaryExpression);
     /**
      * @type {Token}
      */
@@ -28,14 +28,58 @@ export class BinaryExpression extends Expression
 }
 tzDeclareNodeKind(BinaryExpression);
 
+export class CallExpression extends Expression
+{
+  /**
+   * @constructor
+   * @param {Expression} callee
+   * @param {Array<Expression>} args
+   */
+  constructor(callee, args)
+  {
+    super(NodeKind.CallExpression);
+    /**
+     * @type {Expression}
+     */
+    this.callee = callee;
+    /**
+     * @type {Array<Expression>}
+     */
+    this.args = args;
+  }
+}
+tzDeclareNodeKind(CallExpression);
+
+export class FunctionExpression extends Expression
+{
+  /**
+   * @constructor
+   * @param {Array<Identifier>} args
+   * @param {BlockStatement} body
+   */
+  constructor(args, body)
+  {
+    super(NodeKind.FunctionExpression);
+    /**
+     * @type {Array<Identifier>}
+     */
+    this.args = args;
+    /**
+     * @type {BlockStatement}
+     */
+    this.body = body;
+  }
+}
+tzDeclareNodeKind(FunctionExpression);
+
 export class UnaryExpression extends Expression
 {
   /**
    * @constructor
    * @param {Token} operator
-   * @param {Expression} argument
+   * @param {Expression} arg
    */
-  constructor(operator, argument)
+  constructor(operator, arg)
   {
     super(NodeKind.UnaryExpression);
     /**
@@ -45,7 +89,7 @@ export class UnaryExpression extends Expression
     /**
      * @type {Expression}
      */
-    this.argument = argument;
+    this.arg = arg;
   }
 }
 tzDeclareNodeKind(UnaryExpression);

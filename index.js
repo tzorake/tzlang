@@ -3,8 +3,12 @@ import fs from "fs"
 import { Parser } from "./src/parser/parser.js"
 import { Environment } from "./src/runtime/environment.js"
 import { Interpreter } from "./src/runtime/interpreter.js"
-import { tzNull, tzFloat, tzBoolean } from "./src/runtime/macros.js"
-import { tzInspectObject } from "./src/parser/macros.js"
+import { tzNull, tzFloat, tzBoolean, tzFunction } from "./src/runtime/macros.js"
+import { tzInspectObject, tzLog } from "./src/parser/macros.js"
+
+const Configuration = {
+  EnableResultLogging: false
+}
 
 function tzInterpret(argv)
 {
@@ -26,13 +30,24 @@ function tzInterpret(argv)
   env.defineConstant("null",  tzNull());
   env.defineConstant("false", tzBoolean(false));
   env.defineConstant("true",  tzBoolean(true));
+  env.defineConstant("print", tzFunction((args, env) => { 
+    console.info(...args); 
+
+    return tzNull();
+  }));
   env.define("x", tzFloat(3));
   env.define("y", tzFloat(8));
 
-  const interpreter = new Interpreter(env);
-  const result = interpreter.evaluate(root);
+  const interpreter = new Interpreter();
+  const result = interpreter.evaluate(root, env);
 
-  tzInspectObject(result);
+  if (Configuration.EnableResultLogging) {
+    tzLog("Root:");
+    tzInspectObject(root);
+    tzLog("");
+    tzLog("Result:");
+    tzInspectObject(result);
+  }
 }
 
 (() => {

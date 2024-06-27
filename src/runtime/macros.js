@@ -1,4 +1,4 @@
-import { NullValue, FloatValue, BooleanValue } from "./values.js";
+import { NullValue, FloatValue, BooleanValue, FunctionValue, NativeFunctionValue } from "./values.js";
 
 /**
  * @returns {NullValue}
@@ -16,6 +16,17 @@ export function tzNull()
 export function tzFloat(value)
 {
   return new FloatValue(value);
+}
+
+/**
+ * @typedef { (args: Array<RuntimeValue>, env: Environment) => RuntimeValue } Fn
+ * @param {Fn} value 
+ * 
+ * @returns {FunctionValue}
+ */
+export function tzFunction(value)
+{
+  return new NativeFunctionValue(value);
 }
 
 /**

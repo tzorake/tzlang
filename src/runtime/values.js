@@ -1,3 +1,6 @@
+import { Identifier } from "../parser/statements/expressions.js";
+import { BlockStatement } from "../parser/statements/statements.js";
+import { Environment } from "./environment.js";
 
 /**
  * @param {number}
@@ -7,25 +10,27 @@ let iota = 0;
  * @readonly
  * @enum {number}
  */
-export const RuntimeValueType = {
-  Null      : iota++,
-  Float     : iota++,
-  Boolean   : iota++,
+export const RuntimeValueKind = {
+  Null           : iota++,
+  Float          : iota++,
+  Boolean        : iota++,
+  NativeFunction : iota++,
+  Function       : iota++,
 };
 
 export class RuntimeValue
 {
   /**
    * @constructor
-   * @param {RuntimeValueType} type
+   * @param {RuntimeValueKind} kind
    */
-  constructor(type)
+  constructor(kind)
   {
     /**
      * The type of the runtime value.
-     * @type {RuntimeValueType}
+     * @type {RuntimeValueKind}
      */
-    this.type = type;
+    this.kind = kind;
   }
 }
 
@@ -36,7 +41,7 @@ export class NullValue extends RuntimeValue
    */
   constructor()
   {
-    super(RuntimeValueType.Null);
+    super(RuntimeValueKind.Null);
     /**
      * @type {null}
      */
@@ -51,7 +56,7 @@ export class BooleanValue extends RuntimeValue
    */
   constructor(value)
   {
-    super(RuntimeValueType.Boolean);
+    super(RuntimeValueKind.Boolean);
     /**
      * @type {boolean}
      */
@@ -66,10 +71,71 @@ export class FloatValue extends RuntimeValue
    */
   constructor(value)
   {
-    super(RuntimeValueType.Float);
+    super(RuntimeValueKind.Float);
     /**
      * @type {number}
      */
     this.value = value;
+  }
+}
+
+// export class FunctionValue extends RuntimeValue
+// {
+//   /**
+//    * @param {Function} value
+//    */
+//   constructor(value)
+//   {
+//     super(RuntimeValueKind.Function);
+//     /**
+//      * @type {Function}
+//      */
+//     this.value = value;
+//   }
+// }
+
+export class FunctionValue extends RuntimeValue
+{
+  /**
+   * @param {Array<Identifier>} args
+   * @param {BlockStatement} body
+   * @param {Environment} env
+   */
+  constructor(args, body, env)
+  {
+    super(RuntimeValueKind.Function);
+    /**
+     * @type {Array<Identifier>}
+     */
+    this.args = args;
+    /**
+     * @type {BlockStatement}
+     */
+    this.body = body;
+    /**
+     * @type {Environment}
+     */
+    this.env = env;
+  }
+}
+
+export class NativeFunctionValue extends RuntimeValue
+{
+  /**
+   * @typedef { (args: Array<RuntimeValue>, env: Environment) => RuntimeValue } Fn
+   * @param {Fn} fn
+   * @param {Environment} env
+   */
+  constructor(fn, env)
+  {
+    super(RuntimeValueKind.NativeFunction);
+    /**
+     * @type {Fn}
+     */
+    this.fn = fn;
+    /**
+     * @type {Environment}
+     */
+    this.env = env;
   }
 }

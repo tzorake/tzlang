@@ -1,8 +1,8 @@
 import { TokenKind, TokenKindAsString } from "../parser/token.js"
 import { NodeKind, NodeKindAsString, Statement } from "../parser/statements/base.js";
-import { Identifier, VariableDeclaration } from "../parser/statements/expressions.js"
+import { Identifier, VariableDeclaration, CallExpression, FunctionExpression, BinaryExpression } from "../parser/statements/expressions.js"
 import { BlockStatement, IfStatement, ForStatement } from "../parser/statements/statements.js"
-import { RuntimeValueType, RuntimeValue, NullValue, FloatValue, BooleanValue } from "./values.js";
+import { RuntimeValueKind, RuntimeValue, NullValue, FloatValue, BooleanValue, FunctionValue } from "./values.js";
 import { Environment } from "./environment.js";
 import { tzNull } from "./macros.js";
 
@@ -10,50 +10,54 @@ export class Interpreter
 {
   /**
    * @constructor
-   * @param {Environment} env
    */
-  constructor(env)
+  constructor()
   {
-    /**
-     * @type {Environment}
-     */
-    this.env = env;
   }
 
   /**
    * @param {Statement} node
+   * @param {Environment} env
    * 
    * @returns {RuntimeValue | null}
    */
-  evaluate(node)
+  evaluate(node, env)
   {
     switch (node.kind) {
       case NodeKind.BlockStatement: {
-        return this.evaluateBlockStatement(node);
+        return this.evaluateBlockStatement(node, env);
       } break;
       
       case NodeKind.VariableDeclaration: {
-        return this.evaluateVariableDeclaration(node);
+        return this.evaluateVariableDeclaration(node, env);
       } break;
 
       case NodeKind.AssignmentExpression: {
-        return this.evaluateAssignmentExpression(node);
+        return this.evaluateAssignmentExpression(node, env);
       } break;
 
       case NodeKind.IfStatement: {
-        return this.evaluateIfStatement(node);
+        return this.evaluateIfStatement(node, env);
       } break;
 
       case NodeKind.ForStatement: {
-        return this.evaluateForStatement(node);
+        return this.evaluateForStatement(node, env);
+      } break;
+
+      case NodeKind.CallExpression: {
+        return this.evaluateCallExpression(node, env);
+      } break;
+
+      case NodeKind.FunctionExpression: {
+        return this.evaluateFunctionExpression(node, env);
       } break;
 
       case NodeKind.BinaryExpression: {
-        return this.evaluateBinaryExpression(node);
+        return this.evaluateBinaryExpression(node, env);
       } break;
 
       case NodeKind.Identifier: {
-        return this.evaluateIdentifier(node);
+        return this.evaluateIdentifier(node, env);
       } break;
 
       case NodeKind.NumericLiteral: {
@@ -66,29 +70,39 @@ export class Interpreter
 
   /**
    * @param {BlockStatement} node
+   * @param {Environment} env
    * 
    * @returns {RuntimeValue}
    */
-  evaluateBlockStatement(node)
+  evaluateBlockStatement(node, env)
   {
-    let last = new NullValue();
+    const scope = new Environment(env);
 
+    let last = new NullValue();
     for (let statement of node.body) {
-      last = this.evaluate(statement);
+      last = this.evaluate(
+        statement,
+        scope
+      );
     }
+
+    console.info(last);
 
     return last;
   }
 
-    /**
+  /**
    * @param {VariableDeclaration} node
+   * @param {Environment} env
    * 
    * @returns {RuntimeValue}
    */
-  evaluateVariableDeclaration(node)
+  evaluateVariableDeclaration(node, env)
   {
-    const value = node.value ? this.evaluate(node.value) : new NullValue();
-    this.env.define(node.name, value);
+    const value = node.value 
+      ? this.evaluate(node.value, env) 
+      : new NullValue();
+    env.define(node.name, value);
 
     return value;
   }
@@ -96,6 +110,7 @@ export class Interpreter
   
   /**
    * @param {AssignmentExpression} node
+   * @param {Environment} env
    * 
    * @throws {Error}
    * @returns {RuntimeValue}
@@ -110,68 +125,132 @@ export class Interpreter
      * @type {Identifier}
      */
     const identifier = node.left;
-    const value = this.evaluate(node.right);
+    const value = this.evaluate(node.right, env);
 
-    return this.env.assign(identifier.name, value);
+    return env.assign(identifier.name, value);
   }
 
   /**
    * @param {IfStatement} node
+   * @param {Environment} env
    * 
    * @throws {Error}
    * @returns {void}
    */
-  evaluateIfStatement(node)
+  evaluateIfStatement(node, env)
   {
-    const result = this.evaluate(node.condition);
-    if (result.type === RuntimeValueType.Boolean) {
+    const result = this.evaluate(
+      node.condition, 
+      new Environment(env)
+    );
+    if (result.kind === RuntimeValueKind.Boolean) {
       return result.value 
-        ? this.evaluate(node.ifBody)
+        ? this.evaluate(
+            node.ifBody, 
+            new Environment(env)
+          )
         : node.elseBody 
-          ? this.evaluate(node.elseBody) 
+          ? this.evaluate(
+              node.elseBody, 
+              new Environment(env)
+            ) 
           : tzNull();
     }
 
     throw new Error(`condition must be boolean: ${node.condition}`);
   }
 
-    /**
+  /**
    * @param {ForStatement} node
+   * @param {Environment} env
    * 
    * @throws {Error}
    * @returns {void}
    */
-    evaluateForStatement(node)
-    {
-      let condition = this.evaluate(node.condition);
-      if (condition.type !== RuntimeValueType.Boolean) {
-        throw new Error(`condition must be boolean: ${node.condition}`);
-      }
-
-      while (condition.value) {
-        this.evaluate(node.body);
-        condition = this.evaluate(node.condition)
-      }
-
-      return tzNull();
+  evaluateForStatement(node, env)
+  {
+    let condition = this.evaluate(
+      node.condition, 
+      new Environment(env)
+    );
+    if (condition.kind !== RuntimeValueKind.Boolean) {
+      throw new Error(`condition must be boolean: ${node.condition}`);
     }
 
+    while (condition.value) {
+      this.evaluate(
+        node.body, 
+        new Environment(env)
+      );
+      condition = this.evaluate(
+        node.condition, 
+        new Environment(env)
+      )
+    }
+
+    return tzNull();
+  }
+
   /**
-   * @param {BinaryExpression} node
+   * @param {CallExpression} node
+   * @param {Environment} env
    * 
    * @throws {Error}
    * @returns {RuntimeValue}
    */
-  evaluateBinaryExpression(node)
+  evaluateCallExpression(node, env)
   {
-    const lhs = this.evaluate(node.left);
-    const rhs = this.evaluate(node.right);
+    const callee = this.evaluate(node.callee, env);
+    const args = node.args;
 
-    if (lhs.type === RuntimeValueType.Float && rhs.type === RuntimeValueType.Float) {
+    if (callee.kind === RuntimeValueKind.NativeFunction) {
+      return callee.fn(node.args, env);
+    }
+
+    const scope = new Environment(env);
+    if (callee.kind === RuntimeValueKind.Function) {
+      args.forEach(arg => {
+        scope.define(arg.name, this.evaluate(arg, env));
+      })
+
+      return this.evaluate(
+        callee.body, 
+        scope
+      );
+    }
+
+    throw new Error(`callee must be function: ${node.callee}`);
+  }
+
+  /**
+   * @param {FunctionExpression} node
+   * @param {Environment} env
+   * 
+   * @throws {Error}
+   * @returns {RuntimeValue}
+   */
+  evaluateFunctionExpression(node, env)
+  {
+    return new FunctionValue(node.args, node.body, env);
+  }
+
+  /**
+   * @param {BinaryExpression} node
+   * @param {Environment} env
+   * 
+   * @throws {Error}
+   * @returns {RuntimeValue}
+   */
+  evaluateBinaryExpression(node, env)
+  {
+    const lhs = this.evaluate(node.left, env);
+    const rhs = this.evaluate(node.right, env);
+
+    if (lhs.kind === RuntimeValueKind.Float && rhs.kind === RuntimeValueKind.Float) {
       return this.evaluateNumericBinaryExpression(node.operator, lhs, rhs);
     }
 
-    if (lhs.type === RuntimeValueType.Boolean && rhs.type === RuntimeValueType.Boolean) {
+    if (lhs.kind === RuntimeValueKind.Boolean && rhs.kind === RuntimeValueKind.Boolean) {
       return this.evaluateBooleanBinaryExpression(node.operator, lhs, rhs);
     }
 
@@ -180,13 +259,14 @@ export class Interpreter
 
   /**
    * @param {Identifier} node
+   * @param {Environment} env
    * 
    * @throws {Error}
    * @returns {RuntimeValue}
    */
-  evaluateIdentifier(node)
+  evaluateIdentifier(node, env)
   {
-    return this.env.lookup(node.name);
+    return env.lookup(node.name);
   }
 
   /**

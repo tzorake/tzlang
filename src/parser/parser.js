@@ -1,7 +1,7 @@
 import { Lexer } from './lexer.js';
 import { TokenKind, Token, TokenKindAsString } from './token.js';
 import { Expression, Statement } from './statements/base.js';
-import { BinaryExpression, Identifier, NumericLiteral, VariableDeclaration, AssignmentExpression } from './statements/expressions.js';
+import { BinaryExpression, Identifier, NumericLiteral, VariableDeclaration, AssignmentExpression, CallExpression, FunctionExpression } from './statements/expressions.js';
 import { BlockStatement, IfStatement, ForStatement } from './statements/statements.js';
 
 /**
@@ -16,12 +16,12 @@ export const Keyword = {
   For    : "for",
 };
 
-export class Parser 
+export class Parser
 {
   /**
    * @constructor
    */
-  constructor() 
+  constructor()
   {
     /**
      * @type {Lexer}
@@ -40,7 +40,7 @@ export class Parser
   reset()
   {
     this.lexer.reset();
-    this.advance();
+    this.token = this.lexer.token(TokenKind.Eof);
   }
 
   advance()
@@ -52,10 +52,11 @@ export class Parser
    * @throws {Error}
    * @returns {BlockStatement}
    */
-  parse(source) 
+  parse(source)
   {
-    this.lexer.setSource(source);
     this.reset();
+    this.lexer.setSource(source);
+    this.advance();
 
     return this.parseBlockStatement(true);
   }
@@ -72,7 +73,7 @@ export class Parser
   }
 
   parseStatement()
-  {    
+  {
     return this.fud() ?? this.parseExpression();
   }
 
@@ -82,7 +83,7 @@ export class Parser
       this.eat(TokenKind.OpenCurly);
     }
     this.skip(TokenKind.Eol);
-    
+
     const statements = [];
     while (global && this.token.type !== TokenKind.Eof || !global && this.token.type !== TokenKind.CloseCurly) {
       const statement = this.parseStatement();
@@ -97,7 +98,7 @@ export class Parser
 
     return new BlockStatement(statements);
   }
-  
+
   /**
    * @throws {Error}
    * @returns {Statement | null}
@@ -115,12 +116,12 @@ export class Parser
           let value = null;
           if (this.token.type === TokenKind.Equal) {
             this.advance();
-            value = this.parseExpression(this.token.precedence - 1);
+            value = this.parseExpression(this.token.precedence);
           }
 
           return new VariableDeclaration(name, value);
         }
-        
+
         if (this.token.type === TokenKind.Identifier && this.token.value === Keyword.If) {
           this.advance();
 
@@ -145,7 +146,7 @@ export class Parser
 
         if (this.token.type === TokenKind.Identifier && this.token.value === Keyword.For) {
           this.advance();
-          
+
           this.eat(TokenKind.OpenParen);
           const condition = this.parseExpression();
           this.eat(TokenKind.CloseParen);
@@ -164,7 +165,7 @@ export class Parser
 
   /**
    * @param {Expression} left
-   * 
+   *
    * @throws {Error}
    * @returns {Expression | null}
    */
@@ -175,21 +176,21 @@ export class Parser
       case TokenKind.Minus:
       case TokenKind.Asterisk:
       case TokenKind.Slash:
-      case TokenKind.LessThan:  
-      case TokenKind.LessThanEqual:  
-      case TokenKind.GreaterThan:  
-      case TokenKind.GreaterThanEqual:  
-      case TokenKind.Bar:  
-      case TokenKind.BarBar:  
-      case TokenKind.Ampersand:  
+      case TokenKind.LessThan:
+      case TokenKind.LessThanEqual:
+      case TokenKind.GreaterThan:
+      case TokenKind.GreaterThanEqual:
+      case TokenKind.Bar:
+      case TokenKind.BarBar:
+      case TokenKind.Ampersand:
       case TokenKind.AmpersandAmpersand:
       case TokenKind.EqualEqual: {
         const token = this.token;
         this.advance();
 
         return new BinaryExpression(
-          token, 
-          left, 
+          token,
+          left,
           this.parseExpression(token.precedence)
         );
       } break;
@@ -199,7 +200,7 @@ export class Parser
         this.advance();
 
         return new AssignmentExpression(
-          left, 
+          left,
           this.parseExpression(token.precedence - 1)
         );
       } break;
@@ -216,10 +217,31 @@ export class Parser
   {
     switch (this.token.type) {
       case TokenKind.Identifier: {
-        const token = this.token;
+        const ident = new Identifier(this.token.value);
         this.advance();
 
-        return new Identifier(token.value);
+        if (this.token.type === TokenKind.OpenParen) {
+          this.advance();
+
+          const expressions = [];
+
+          if (this.token.type !== TokenKind.CloseParen) {
+            let expression = this.parseExpression();
+            expressions.push(expression);
+
+            while (this.token.type !== TokenKind.CloseParen) {
+              this.eat(TokenKind.Comma);
+              expression = this.parseExpression();
+              expressions.push(expression);
+            }
+          }
+
+          this.eat(TokenKind.CloseParen);
+
+          return new CallExpression(ident, expressions);
+        }
+
+        return ident;
       } break;
 
       case TokenKind.NumericLiteral: {
@@ -231,10 +253,25 @@ export class Parser
 
       case TokenKind.OpenParen: {
         this.advance();
-        const expression = this.parseExpression();
-        this.eat(TokenKind.CloseParen);
 
-        return expression;
+        const args = [];
+        if (this.token.type !== TokenKind.CloseParen) {
+          let expression = this.parseExpression();
+          args.push(expression);
+  
+          while (this.token.type !== TokenKind.CloseParen) {
+            this.eat(TokenKind.Comma);
+            expression = this.parseExpression();
+            args.push(expression);
+          }
+        }
+
+        this.eat(TokenKind.CloseParen);
+        this.eat(TokenKind.EqualGreaterThan);
+
+        const block = this.parseBlockStatement();
+
+        return new FunctionExpression(args, block);
       } break;
     }
 
@@ -243,7 +280,7 @@ export class Parser
 
   /**
    * @param {TokenKind} type
-   * 
+   *
    * @throws {Error}
    * @returns {void}
    */
@@ -259,7 +296,7 @@ export class Parser
 
     /**
    * @param {TokenKind} type
-   * 
+   *
    * @throws {Error}
    * @returns {void}
    */

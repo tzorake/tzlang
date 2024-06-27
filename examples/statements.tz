@@ -7,4 +7,12 @@ for (a > 0) {
   a = a - 10
 }
 
+let null_value = () => {
+  null
+}
+
+let add = (a, b) => {
+  let c = a + b
+}
+
 a

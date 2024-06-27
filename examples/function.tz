@@ -1,0 +1,13 @@
+print(1992392)
+print(false)
+print(null)
+print(print)
+let f = () => {
+  let g = () => {
+    print(24)
+  }
+  print(45)
+  g
+}
+let h = f()
+h()
