@@ -7,3 +7,7 @@ let a = (b, c) => {
   d
 }
 let k = a(4, 5, 6)()
+let h = a(23, 55)
+h()
+let p
+print(p)

@@ -171,6 +171,27 @@ export class Parser
   led(left)
   {
     switch (this.token.type) {
+      case TokenKind.OpenParen: {
+        this.advance();
+
+        const args = [];
+
+        if (this.token.type !== TokenKind.CloseParen) {
+          let expression = this.parseExpression();
+          args.push(expression);
+
+          while (this.token.type !== TokenKind.CloseParen) {
+            this.eat(TokenKind.Comma);
+            expression = this.parseExpression();
+            args.push(expression);
+          }
+        }
+
+        this.eat(TokenKind.CloseParen);
+
+        return new CallExpression(left, args);
+      }
+
       case TokenKind.Plus:
       case TokenKind.Minus:
       case TokenKind.Asterisk:
@@ -218,27 +239,6 @@ export class Parser
       case TokenKind.Identifier: {
         const identifier = new Identifier(this.token.value);
         this.advance();
-
-        if (this.token.type === TokenKind.OpenParen) {
-          this.advance();
-
-          const args = [];
-
-          if (this.token.type !== TokenKind.CloseParen) {
-            let expression = this.parseExpression();
-            args.push(expression);
-
-            while (this.token.type !== TokenKind.CloseParen) {
-              this.eat(TokenKind.Comma);
-              expression = this.parseExpression();
-              args.push(expression);
-            }
-          }
-
-          this.eat(TokenKind.CloseParen);
-
-          return new CallExpression(identifier, args);
-        }
 
         return identifier;
       } break;

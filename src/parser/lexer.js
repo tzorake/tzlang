@@ -457,7 +457,7 @@ export class Lexer
         } break;
 
         case "(": {
-          return this.advanceCurrent(TokenKind.OpenParen);
+          return this.advanceCurrent(TokenKind.OpenParen, 2);
         } break;
 
         case ")": {
