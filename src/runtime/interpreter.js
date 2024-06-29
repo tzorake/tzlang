@@ -5,6 +5,7 @@ import { BlockStatement, IfStatement, ForStatement } from "../parser/statements/
 import { RuntimeValueKind, RuntimeValue, NullValue, FloatValue, BooleanValue, FunctionValue } from "./values.js";
 import { Environment } from "./environment.js";
 import { tzNull } from "./macros.js";
+import { tzInspectObject, tzLog } from "../parser/macros.js";
 
 export class Interpreter
 {
@@ -85,8 +86,6 @@ export class Interpreter
         scope
       );
     }
-
-    console.info(last);
 
     return last;
   }
@@ -201,22 +200,20 @@ export class Interpreter
   evaluateCallExpression(node, env)
   {
     const callee = this.evaluate(node.callee, env);
-    const args = node.args;
+    const values = node.args.map(arg => this.evaluate(arg, env));
 
     if (callee.kind === RuntimeValueKind.NativeFunction) {
-      return callee.fn(node.args, env);
+      return callee.fn(values, callee.env);
     }
 
-    const scope = new Environment(env);
     if (callee.kind === RuntimeValueKind.Function) {
-      args.forEach(arg => {
-        scope.define(arg.name, this.evaluate(arg, env));
-      })
+      const args = callee.args;
+      const scope = new Environment(callee.env);
+      args.forEach((arg, idx) => {
+        scope.define(arg.name, values[idx] ?? tzNull());
+      });
 
-      return this.evaluate(
-        callee.body, 
-        scope
-      );
+      return this.evaluate(callee.body, scope);
     }
 
     throw new Error(`callee must be function: ${node.callee}`);
@@ -231,7 +228,10 @@ export class Interpreter
    */
   evaluateFunctionExpression(node, env)
   {
-    return new FunctionValue(node.args, node.body, env);
+    const args = node.args;
+    const body = node.body;
+
+    return new FunctionValue(args, body, env);
   }
 
   /**

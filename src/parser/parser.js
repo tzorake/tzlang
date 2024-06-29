@@ -1,7 +1,7 @@
 import { Lexer } from './lexer.js';
 import { TokenKind, Token, TokenKindAsString } from './token.js';
 import { Expression, Statement } from './statements/base.js';
-import { BinaryExpression, Identifier, NumericLiteral, VariableDeclaration, AssignmentExpression, CallExpression, FunctionExpression } from './statements/expressions.js';
+import { BinaryExpression, Identifier, NumericLiteral, VariableDeclaration, AssignmentExpression, CallExpression, FunctionExpression, StringLiteral } from './statements/expressions.js';
 import { BlockStatement, IfStatement, ForStatement } from './statements/statements.js';
 
 /**
@@ -74,7 +74,7 @@ export class Parser
 
   parseStatement()
   {
-    return this.fud() ?? this.parseExpression();
+    return this.fud();
   }
 
   parseBlockStatement(global = false)
@@ -107,7 +107,7 @@ export class Parser
   {
     switch (this.token.type) {
       case TokenKind.Identifier: {
-        if (this.token.type === TokenKind.Identifier && this.token.value === Keyword.Let) {
+        if (this.token.value === Keyword.Let) {
           this.advance();
 
           const name = this.token.value;
@@ -122,13 +122,12 @@ export class Parser
           return new VariableDeclaration(name, value);
         }
 
-        if (this.token.type === TokenKind.Identifier && this.token.value === Keyword.If) {
+        if (this.token.value === Keyword.If) {
           this.advance();
 
           this.eat(TokenKind.OpenParen);
           const condition = this.parseExpression();
           this.eat(TokenKind.CloseParen);
-
 
           let ifBlock = this.token.type === TokenKind.OpenCurly
             ? this.parseBlockStatement()
@@ -144,7 +143,7 @@ export class Parser
           return new IfStatement(condition, ifBlock, elseBlock);
         }
 
-        if (this.token.type === TokenKind.Identifier && this.token.value === Keyword.For) {
+        if (this.token.value === Keyword.For) {
           this.advance();
 
           this.eat(TokenKind.OpenParen);
@@ -160,7 +159,7 @@ export class Parser
       } break;
     }
 
-    return null;
+    return this.parseExpression();
   }
 
   /**
@@ -217,31 +216,38 @@ export class Parser
   {
     switch (this.token.type) {
       case TokenKind.Identifier: {
-        const ident = new Identifier(this.token.value);
+        const identifier = new Identifier(this.token.value);
         this.advance();
 
         if (this.token.type === TokenKind.OpenParen) {
           this.advance();
 
-          const expressions = [];
+          const args = [];
 
           if (this.token.type !== TokenKind.CloseParen) {
             let expression = this.parseExpression();
-            expressions.push(expression);
+            args.push(expression);
 
             while (this.token.type !== TokenKind.CloseParen) {
               this.eat(TokenKind.Comma);
               expression = this.parseExpression();
-              expressions.push(expression);
+              args.push(expression);
             }
           }
 
           this.eat(TokenKind.CloseParen);
 
-          return new CallExpression(ident, expressions);
+          return new CallExpression(identifier, args);
         }
 
-        return ident;
+        return identifier;
+      } break;
+
+      case TokenKind.StringLiteral: {
+        const token = this.token;
+        this.advance();
+
+        return new StringLiteral(token.value);
       } break;
 
       case TokenKind.NumericLiteral: {

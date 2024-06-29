@@ -7,7 +7,7 @@ import { tzNull, tzFloat, tzBoolean, tzFunction } from "./src/runtime/macros.js"
 import { tzInspectObject, tzLog } from "./src/parser/macros.js"
 
 const Configuration = {
-  EnableResultLogging: false
+  EnableResultLogging: true
 }
 
 function tzInterpret(argv)

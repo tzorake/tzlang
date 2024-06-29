@@ -1,3 +1,4 @@
+import { Environment } from "./environment.js";
 import { NullValue, FloatValue, BooleanValue, FunctionValue, NativeFunctionValue } from "./values.js";
 
 /**
@@ -21,12 +22,13 @@ export function tzFloat(value)
 /**
  * @typedef { (args: Array<RuntimeValue>, env: Environment) => RuntimeValue } Fn
  * @param {Fn} value 
+ * @param {Environment} env
  * 
  * @returns {FunctionValue}
  */
-export function tzFunction(value)
+export function tzFunction(value, env)
 {
-  return new NativeFunctionValue(value);
+  return new NativeFunctionValue(value, env);
 }
 
 /**

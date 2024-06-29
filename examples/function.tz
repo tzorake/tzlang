@@ -1,13 +1,9 @@
-print(1992392)
-print(false)
-print(null)
-print(print)
-let f = () => {
-  let g = () => {
-    print(24)
+let a = (b, c) => {
+  let d = () => {
+    print(32)
+    print(b)
+    print(c)
   }
-  print(45)
-  g
+  d
 }
-let h = f()
-h()
+let k = a(4, 5, 6)()

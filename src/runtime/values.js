@@ -79,21 +79,6 @@ export class FloatValue extends RuntimeValue
   }
 }
 
-// export class FunctionValue extends RuntimeValue
-// {
-//   /**
-//    * @param {Function} value
-//    */
-//   constructor(value)
-//   {
-//     super(RuntimeValueKind.Function);
-//     /**
-//      * @type {Function}
-//      */
-//     this.value = value;
-//   }
-// }
-
 export class FunctionValue extends RuntimeValue
 {
   /**
@@ -122,15 +107,18 @@ export class FunctionValue extends RuntimeValue
 export class NativeFunctionValue extends RuntimeValue
 {
   /**
-   * @typedef { (args: Array<RuntimeValue>, env: Environment) => RuntimeValue } Fn
-   * @param {Fn} fn
+   * @typedef {(args: Array<RuntimeValue>, env: Environment) => RuntimeValue} NativeFunction
+   */
+
+  /**
+   * @param {NativeFunction} fn
    * @param {Environment} env
    */
   constructor(fn, env)
   {
     super(RuntimeValueKind.NativeFunction);
     /**
-     * @type {Fn}
+     * @type {NativeFunction}
      */
     this.fn = fn;
     /**
