@@ -18,10 +18,12 @@ export function tzFloat(value)
 {
   return new FloatValue(value);
 }
+/**
+ * @typedef {(args: Array<RuntimeValue>, env: Environment) => RuntimeValue} NativeFunction
+ */
 
 /**
- * @typedef { (args: Array<RuntimeValue>, env: Environment) => RuntimeValue } Fn
- * @param {Fn} value 
+ * @param {NativeFunction} value 
  * @param {Environment} env
  * 
  * @returns {FunctionValue}
