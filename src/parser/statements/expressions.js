@@ -176,6 +176,23 @@ export class VariableDeclaration extends Expression
 }
 tzDeclareNodeKind(VariableDeclaration);
 
+export class VariableDeclarationArray extends Expression
+{
+  /**
+   * @constructor
+   * @param {Array<VariableDeclaration>} array
+   */
+  constructor(array)
+  {
+    super(NodeKind.VariableDeclarationArray);
+    /**
+     * @type {Array<VariableDeclaration>}
+     */
+    this.array = array;
+  }
+}
+tzDeclareNodeKind(VariableDeclarationArray);
+
 export class AssignmentExpression extends Expression
 {
   /**

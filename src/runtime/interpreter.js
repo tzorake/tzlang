@@ -1,6 +1,6 @@
 import { TokenKind, TokenKindAsString } from "../parser/token.js"
 import { NodeKind, NodeKindAsString, Statement } from "../parser/statements/base.js";
-import { Identifier, VariableDeclaration, CallExpression, FunctionExpression, BinaryExpression } from "../parser/statements/expressions.js"
+import { Identifier, VariableDeclaration, CallExpression, FunctionExpression, BinaryExpression, VariableDeclarationArray } from "../parser/statements/expressions.js"
 import { BlockStatement, IfStatement, ForStatement } from "../parser/statements/statements.js"
 import { RuntimeValueKind, RuntimeValue, NullValue, FloatValue, BooleanValue, FunctionValue } from "./values.js";
 import { Environment } from "./environment.js";
@@ -31,6 +31,10 @@ export class Interpreter
       
       case NodeKind.VariableDeclaration: {
         return this.evaluateVariableDeclaration(node, env);
+      } break;
+
+      case NodeKind.VariableDeclarationArray: {
+        return this.evaluateVariableDeclarationArray(node, env);
       } break;
 
       case NodeKind.AssignmentExpression: {
@@ -106,6 +110,20 @@ export class Interpreter
     return value;
   }
 
+  /**
+   * @param {VariableDeclarationArray} node
+   * @param {Environment} env
+   * 
+   * @returns {RuntimeValue}
+   */
+  evaluateVariableDeclarationArray(node, env)
+  {
+    const array = node.array;
+    array.map(node => this.evaluateVariableDeclaration(node, env));
+
+    // TODO: rewrite after instroduction of arrays
+    return tzNull();
+  }
   
   /**
    * @param {AssignmentExpression} node

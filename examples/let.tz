@@ -1,0 +1,9 @@
+let g = 3
+let h
+let a, b, c = 1, 2 + 912 + 123, null
+let i, o
+
+print(g)
+print(h)
+print(a, b, c)
+print(i, o)

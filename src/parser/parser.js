@@ -1,7 +1,7 @@
 import { Lexer } from './lexer.js';
 import { TokenKind, Token, TokenKindAsString } from './token.js';
 import { Expression, Statement } from './statements/base.js';
-import { BinaryExpression, Identifier, NumericLiteral, VariableDeclaration, AssignmentExpression, CallExpression, FunctionExpression, StringLiteral } from './statements/expressions.js';
+import { BinaryExpression, Identifier, NumericLiteral, VariableDeclaration, AssignmentExpression, CallExpression, FunctionExpression, StringLiteral, VariableDeclarationArray } from './statements/expressions.js';
 import { BlockStatement, IfStatement, ForStatement } from './statements/statements.js';
 
 /**
@@ -110,16 +110,45 @@ export class Parser
         if (this.token.value === Keyword.Let) {
           this.advance();
 
-          const name = this.token.value;
-          this.eat(TokenKind.Identifier);
+          const names = [];
+          const values = [];
 
-          let value = null;
+          for(;;) {
+            const name = this.token.value;
+            this.eat(TokenKind.Identifier);
+
+            names.push(name);
+
+            if (this.token.type !== TokenKind.Comma) {
+              break;
+            }
+
+            this.eat(TokenKind.Comma);
+          };
+
           if (this.token.type === TokenKind.Equal) {
             this.advance();
-            value = this.parseExpression(this.token.precedence);
+
+            for(;;) {
+              const value = this.parseExpression();
+
+              values.push(value);
+                
+              if (this.token.type !== TokenKind.Comma) {
+                break;
+              }
+
+              this.eat(TokenKind.Comma);
+            }
           }
 
-          return new VariableDeclaration(name, value);
+          if (values.length !== 0 && names.length !== values.length) {
+            throw new Error(`Expected ${names.length} values, got ${values.length}`);
+          }
+
+          return new VariableDeclarationArray(
+            names.map((name, idx) => new VariableDeclaration(name, values[idx]))
+          );
         }
 
         if (this.token.value === Keyword.If) {
